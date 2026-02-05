@@ -1,0 +1,202 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: idp
+      POSTGRES_PASSWORD: idp
+      POSTGRES_DB: idp
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+
+  temporal:
+    image: temporalio/auto-setup:1.24.2
+    environment:
+      - DB=postgresql
+      - DB_PORT=5432
+      - POSTGRES_USER=idp
+      - POSTGRES_PWD=idp
+      - POSTGRES_DB=temporal
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml
+    ports:
+      - "7233:7233" # gRPC
+      - "8233:8233" # Web UI
+    depends_on:
+      - postgres
+
+  control-plane-api:
+    build:
+      context: ..
+      dockerfile: control-plane-api/Dockerfile
+    image: nuevo-idp/control-plane-api:dev
+    environment:
+      - DATABASE_URL=postgres://idp:idp@postgres:5432/idp?sslmode=disable
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - SERVICE_NAME=control-plane-api
+      - ENVIRONMENT=dev
+      - INTERNAL_AUTH_TOKEN=${INTERNAL_AUTH_TOKEN:-dev-internal-token}
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+
+  workflow-engine:
+    build:
+      context: ..
+      dockerfile: workflow-engine/Dockerfile
+    image: nuevo-idp/workflow-engine:dev
+    environment:
+      - TEMPORAL_HOST=temporal:7233
+      - CONTROL_PLANE_API_URL=http://control-plane-api:8080
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - SERVICE_NAME=workflow-engine
+      - ENVIRONMENT=dev
+      - INTERNAL_AUTH_TOKEN=${INTERNAL_AUTH_TOKEN:-dev-internal-token}
+    depends_on:
+      - temporal
+      - control-plane-api
+    ports:
+      - "8081:8081"
+
+  execution-workers:
+    build:
+      context: ..
+      dockerfile: execution-workers/Dockerfile
+    image: nuevo-idp/execution-workers:dev
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_API_URL=https://api.github.com
+      - TEMPORAL_HOST=temporal:7233
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - SERVICE_NAME=execution-workers
+      - ENVIRONMENT=dev
+      - INTERNAL_AUTH_TOKEN=${INTERNAL_AUTH_TOKEN:-dev-internal-token}
+    depends_on:
+      - temporal
+
+  control-plane-api-tests:
+    image: golang:1.24
+    command: ["go", "test", "./..."]
+    working_dir: /app/control-plane-api
+    volumes:
+      - ..:/app
+    environment:
+      - DATABASE_URL=postgres://idp:idp@postgres:5432/idp?sslmode=disable
+    depends_on:
+      - postgres
+
+  execution-workers-tests:
+    image: golang:1.24
+    command: ["go", "test", "./..."]
+    working_dir: /app/execution-workers
+    volumes:
+      - ..:/app
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+    depends_on:
+      - execution-workers
+
+  workflow-engine-tests:
+    image: golang:1.24
+    command: ["go", "test", "./..."]
+    working_dir: /app/workflow-engine
+    volumes:
+      - ..:/app
+    environment: []
+
+  smoke-tests:
+    image: golang:1.22
+    working_dir: /app/infra/smoke
+    volumes:
+      - ..:/app
+    command: ["go", "test", "./..."]
+    environment:
+      - INTERNAL_AUTH_TOKEN=${INTERNAL_AUTH_TOKEN:-dev-internal-token}
+    depends_on:
+      - postgres
+      - temporal
+      - control-plane-api
+      - workflow-engine
+      - execution-workers
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.106.0
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol/config.yaml:ro
+
+  tempo:
+    image: grafana/tempo:2.5.0
+    command: ["-config.file=/etc/tempo/tempo.yaml"]
+    volumes:
+      - ./tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro
+    ports:
+      - "3200:3200" # Tempo HTTP API para Grafana
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+    depends_on:
+      - otel-collector
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.57
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686" # Jaeger UI (opcional, no requerido si usás sólo Tempo)
+      - "14268:14268"
+    depends_on:
+      - otel-collector
+
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - control-plane-api
+      - workflow-engine
+      - execution-workers
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=grafana-tempo-datasource
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+      - tempo
+
+  golangci-lint:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.golangci-lint
+    working_dir: /app
+    volumes:
+      - ..:/app
+    command:
+      - sh
+      - -c
+      - |
+        cd control-plane-api && golangci-lint run --config ../.golangci.yml ./... && echo 'control-plane-api: lint OK' &&
+        cd ../workflow-engine && golangci-lint run --config ../.golangci.yml ./... && echo 'workflow-engine: lint OK' &&
+        cd ../execution-workers && golangci-lint run --config ../.golangci.yml ./... && echo 'execution-workers: lint OK'
+
+volumes:
+  postgres-data:
+  grafana-data:

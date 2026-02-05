@@ -1,0 +1,45 @@
+# Go
+bin/
+cmd/**/bin/
+vendor/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage.*
+*.coverprofile
+*.prof
+
+# IDEs
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon files
+Icon?
+
+# Thumbnails
+._*
+
+# External disk/trash metadata
+.Spotlight-V100
+.Trashes
+.TemporaryItems
+.fseventsd
+
+# Logs
+*.log
+
+# Docker / env
+*.env
+.env.local
+.env.*.local
+.docker/
+docker-compose.override.yml

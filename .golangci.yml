@@ -1,0 +1,35 @@
+version: 2
+
+run:
+  timeout: 5m
+  tests: true
+  go: "1.24"
+
+linters:
+  disable-all: true
+  enable:
+    - govet
+    - staticcheck
+    - errcheck
+    - gosec
+    - gocritic
+    - nolintlint
+    - gocyclo
+    - wrapcheck
+    - dupl
+    - ineffassign
+    - misspell
+    - unparam
+
+linters-settings:
+  gocyclo:
+    min-complexity: 15
+  wrapcheck:
+    ignoreSigs:
+      - .Errorf(
+  nolintlint:
+    require-explanation: true
+    require-specific: true
+
+issues:
+  exclude-use-default: false

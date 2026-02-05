@@ -1,0 +1,10 @@
+FROM golang:1.24
+
+# Asegura GOPATH y PATH para que golangci-lint quede visible
+ENV GOPATH=/go
+ENV PATH="${GOPATH}/bin:${PATH}"
+
+# Instala golangci-lint en la imagen de Go 1.24
+RUN go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0
+
+WORKDIR /app

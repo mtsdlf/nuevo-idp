@@ -1,0 +1,373 @@
+{
+    "domain": "internal-developer-platform",
+    "version": "1.1.1",
+    "principles": [
+      "team_is_sovereign",
+      "application_requires_onboarding",
+      "intent_separated_from_execution",
+      "domain_state_is_source_of_truth",
+      "no_manual_steps"
+    ],
+  
+    "approvalTypes": {
+      "manual": {
+        "description": "Aprobación por operador humano autorizado",
+        "rolesAllowed": ["platformAdmin", "securityAdmin"],
+        "methods": ["webUi", "api"]
+      },
+      "externalSystem": {
+        "description": "Esperar webhook/response de sistema externo"
+      }
+    },
+  
+    "resourceTypes": {
+      "Team": {
+        "aggregateRoot": true,
+        "spec": {"id": "string", "name": "string"},
+        "status": {"state": ["Draft", "Active", "Suspended", "Archived"]},
+        "invariants": [
+  A
+          "suspended_team_cannot_start_workflows"
+        ],
+        "metadata": {"createdBy": "string", "createdAt": "datetime", "tags": ["string"]}
+      },
+      "Application": {
+        "aggregateRoot": true,
+        "ownedBy": "Team",
+        "spec": {"id": "string", "name": "string", "teamRef": {"type": "Team", "field": "id"}},
+        "status": {"state": [
+          "Proposed", "Approved", "Onboarding", "Active", "Deprecated", "Decommissioning", "Archived"
+        ]},
+        "invariants": [
+          "application_has_single_team",
+          "application_team_is_immutable",
+          "application_active_requires_done_criteria"
+        ],
+        "metadata": {"createdBy": "string", "createdAt": "datetime", "tags": ["string"]}
+      },
+      "Environment": {
+        "global": true,
+        "spec": {"id": "string", "name": "string"},
+        "status": {"state": ["Planned", "Active", "Frozen", "Retired"]}
+      },
+      "ApplicationEnvironment": {
+        "ownedBy": "Application",
+        "spec": {
+          "id": "string",
+          "applicationRef": {"type": "Application", "field": "id"},
+          "environmentRef": {"type": "Environment", "field": "id"}
+        },
+        "status": {"state": [
+          "Declared", "Provisioning", "Active", "Frozen", "Decommissioning", "Retired"
+        ]},
+        "invariants": [
+          "unique_application_environment_pair",
+          "runtime_requires_active_application_environment"
+        ],
+        "metadata": {"createdBy": "string", "createdAt": "datetime", "tags": ["string"]}
+      },
+      "CodeRepository": {
+        "ownedBy": "Application",
+        "spec": {
+          "id": "string", "applicationRef": {"type": "Application", "field": "id"},
+          "repositoryType": "code"
+        },
+        "status": {"state": ["Declared", "Provisioning", "Active", "Archived"]},
+        "policies": {"branchProtection": "mandatory_global"},
+        "metadata": {"createdBy": "string", "createdAt": "datetime", "tags": ["string"]}
+      },
+      "DeploymentRepository": {
+        "ownedBy": "Application",
+        "optional": true,
+        "spec": {
+          "id": "string", "applicationRef": {"type": "Application", "field": "id"},
+          "deploymentModel": ["GitOpsPerApplication", "GitOpsSharedByTeam"]
+        },
+        "status": {"state": ["Declared", "Provisioning", "Active", "Archived"]},
+        "metadata": {"createdBy": "string", "createdAt": "datetime", "tags": ["string"]}
+      },
+      "GitOpsIntegration": {
+        "ownedBy": "Application",
+        "spec": {
+          "id": "string", "applicationRef": {"type": "Application", "field": "id"},
+          "repositoryRef": {"type": "DeploymentRepository", "field": "id"}
+        },
+        "invariants": ["gitops_integration_required_for_active_application"],
+        "metadata": {"createdBy": "string", "createdAt": "datetime"}
+      },
+      "Secret": {
+        "ownedBy": "Team",
+        "spec": {
+          "id": "string", "ownerTeamRef": {"type": "Team", "field": "id"},
+          "purpose": ["container_registry", "vcs_access", "runtime", "external_integration"],
+          "sensitivity": ["low", "medium", "high"]
+        },
+        "status": {"state": [
+          "Declared", "Provisioning", "Active", "Rotating", "Suspended", "Revoked", "Archived"
+        ]},
+        "invariants": [
+          "secret_must_have_owner_team",
+          "revoked_secret_cannot_be_reactivated"
+        ],
+        "metadata": {"createdBy": "string", "createdAt": "datetime"}
+      },
+      "SecretBinding": {
+        "ownedBy": "Secret",
+        "spec": {
+          "id": "string", "secretRef": {"type": "Secret", "field": "id"},
+          "targetRef": {
+            "type": ["CodeRepository", "DeploymentRepository", "ApplicationEnvironment"],
+            "field": "id"
+          }
+        },
+        "status": {"state": ["Declared", "Provisioning", "Active", "Suspended", "Revoked"]},
+        "invariants": ["binding_requires_active_secret"],
+        "metadata": {"createdBy": "string", "createdAt": "datetime"}
+      }
+    },
+  
+    "eventTriggers": {
+      "onApplicationApproved": {
+        "when": "Application. Status. State == Approved",
+        "triggerWorkflow": "ApplicationOnboarding"
+      },
+      "onAppEnvDeclared": {
+        "when": "ApplicationEnvironment. Status. State == Declared",
+        "triggerWorkflow": "ApplicationEnvironmentProvisioning"
+      },
+      "onAllAppEnvActive": {
+        "when": "all ApplicationEnvironment. Status. State == Active",
+        "triggerWorkflow": "ApplicationActivation"
+      },
+      "onSecretsRotated": {
+        "when": "Secret. Status. State == Rotating",
+        "triggerWorkflow": "SecretRotation"
+      }
+    },
+  
+    "workflows": {
+      "ApplicationOnboarding": {
+        "version": "2.0.0",
+        "preconditions": ["Application. Status. State == Approved"],
+        "steps": [
+          {
+            "action": "create",
+            "resource": "CodeRepository",
+            "retryPolicy": { "maxAttempts": 3, "backoffSeconds": 30 },
+            "onFailure": "failWorkflow"
+          },
+          {
+            "action": "create",
+            "resource": "DeploymentRepository",
+            "condition": "required",
+            "retryPolicy": { "maxAttempts": 2, "backoffSeconds": 15 }
+          },
+          {
+            "action": "create",
+            "resource": "GitOpsIntegration"
+          },
+          {
+            "action": "declare",
+            "resource": "ApplicationEnvironments"
+          },
+          {
+            "action": "waitForEvent",
+            "eventName": "SecurityScanPassed",
+            "sourceType": "externalSystem",
+            "timeoutSeconds": 900,
+            "onTimeout": "failWorkflow"
+          },
+          {
+            "action": "transition",
+            "resource": "Application",
+            "field": "status. State",
+            "to": "Onboarding"
+          }
+        ],
+        "hook": {
+          "beforeStart": [
+            { "type": "notify", "message": "Iniciando onboarding de aplicación..." }
+          ],
+          "afterSuccess": [
+            { "type": "auditLog", "message": "Onboarding completado" }
+          ],
+          "onFailure": [
+            { "type": "notify", "message": "Onboarding fallido", "channel": "alerts" }
+          ]
+        },
+        "waitForSignal": false,
+        "postconditions": ["Application. Status. State == Onboarding"]
+      },
+      "ApplicationEnvironmentProvisioning": {
+        "version": "2.0.0",
+        "preconditions": ["ApplicationEnvironment.status.state == Declared"],
+        "steps": [
+          {
+            "action": "materialize",
+            "resource": "repositories"
+          },
+          {
+            "action": "apply",
+            "resource": "branch protection"
+          },
+          {
+            "action": "provision",
+            "resource": "secrets"
+          },
+          {
+            "action": "create",
+            "resource": "SecretBindings"
+          },
+          {
+            "action": "verify",
+            "resource": "gitops reconciliation",
+            "retryPolicy": { "maxAttempts": 5, "backoffSeconds": 10 }
+          },
+          {
+            "action": "transition",
+            "resource": "ApplicationEnvironment",
+            "field": "status.state",
+            "to": "Active"
+          }
+        ],
+        "hook": {
+          "afterStep": [
+            {
+              "ifStep": "transition",
+              "type": "notify",
+              "message": "Provisioning terminado para ApplicationEnvironment."
+            }
+          ]
+        },
+        "waitForSignal": false,
+        "postconditions": [
+          "ApplicationEnvironment.status.state == Active"
+        ]
+      },
+  
+      "ApplicationActivation": {
+        "version": "2.0.0",
+        "preconditions": [ "all ApplicationEnvironment.status.state == Active" ],
+        "steps": [
+          {
+            "action": "transition",
+            "resource": "Application",
+            "field": "status.state",
+            "to": "Active"
+          }
+        ],
+        "hook": {
+          "beforeStart": [
+            { "type": "notify", "message": "Activando aplicación…" }
+          ],
+          "afterSuccess": [
+            { "type": "auditLog", "message": "Aplicación activada correctamente." }
+          ]
+        },
+        "waitForSignal": false,
+        "postconditions": [
+          "Application.status.state == Active"
+        ]
+      },
+  
+      "ApplicationDecommissioning": {
+        "version": "2.0.0",
+        "preconditions": [ "Application.status.state == Deprecated" ],
+        "steps": [
+          {
+            "action": "waitForApproval",
+            "approvalType": "manual",
+            "approvalRole": "platformAdmin",
+            "signalName": "DecommissioningApproval",
+            "timeoutSeconds": 172800,
+            "onTimeout": "failWorkflow"
+          },
+          {
+            "action": "transition",
+            "resource": "Application",
+            "field": "status.state",
+            "to": "Decommissioning"
+          },
+          {
+            "action": "transition",
+            "resource": "ApplicationEnvironment",
+            "field": "status.state",
+            "to": "Decommissioning",
+            "fanout": true
+          },
+          {
+            "action": "revoke",
+            "resource": "SecretBindings",
+            "fanout": true
+          },
+          {
+            "action": "transition",
+            "resource": "Application",
+            "field": "status.state",
+            "to": "Archived"
+          }
+        ],
+        "hook": {
+          "afterSuccess": [
+            { "type": "auditLog", "message": "Aplicación archivada tras decommissioning" }
+          ]
+        },
+        "waitForSignal": false
+      },
+  
+      "SecretRotation": {
+        "version": "1.0.0",
+        "preconditions": [ "Secret.status.state == Rotating" ],
+        "steps": [
+          {
+            "action": "rotate",
+            "resource": "Secret"
+          },
+          {
+            "action": "waitForEvent",
+            "eventName": "RotationValidatedExternally",
+            "sourceType": "externalSystem",
+            "timeoutSeconds": 3600,
+            "onTimeout": "failWorkflow"
+          },
+          {
+            "action": "update",
+            "resource": "SecretBindings",
+            "condition": "all targetRef for Secret",
+            "fanout": true
+          },
+          {
+            "action": "transition",
+            "resource": "Secret",
+            "field": "status.state",
+            "to": "Active"
+          }
+        ],
+        "hook": {
+          "afterStep": [
+            {
+              "ifStep": "rotate",
+              "type": "notify",
+              "message": "Secreto rotado exitosamente."
+            }
+          ]
+        },
+        "waitForSignal": false,
+        "postconditions": [
+          "Secret.status.state == Active"
+        ]
+      }
+    },
+  
+    "doneCriteria": {
+      "ApplicationActive": [
+        "Application. Status. State == Active",
+        "all ApplicationEnvironment. Status. State == Active",
+        "all CodeRepository. Status. State == Active",
+        "all DeploymentRepository. Status. State == Active if exists",
+        "all Secret. Status. State == Active",
+        "all SecretBinding. Status. State == Active",
+        "GitOpsIntegration exists"
+      ]
+    }
+  }

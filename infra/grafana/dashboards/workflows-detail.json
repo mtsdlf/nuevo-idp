@@ -1,0 +1,168 @@
+{
+  "id": null,
+  "uid": "idp-workflows-detail",
+  "title": "IDP Workflows Detail",
+  "tags": ["idp", "workflows"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "templating": {
+    "list": [
+      {
+        "name": "env",
+        "type": "query",
+        "label": "Environment",
+        "datasource": "Prometheus",
+        "query": "label_values(http_requests_total, env)",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "current": {"text": "All", "value": "__all"}
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "row",
+      "title": "Application Onboarding",
+      "gridPos": {"x": 0, "y": 0, "w": 24, "h": 1}
+    },
+    {
+      "type": "stat",
+      "title": "Onboarding Success Rate",
+      "gridPos": {"x": 0, "y": 1, "w": 8, "h": 6},
+      "targets": [
+        {
+          "expr": "sum(rate(domain_events_total{event=\"workflow_application_onboarding_completed\", result=\"success\"}[15m])) / (sum(rate(domain_events_total{event=\"workflow_application_onboarding_completed\", result=\"success\"}[15m])) + sum(rate(domain_events_total{event=\"workflow_application_onboarding_failed\"}[15m])))",
+          "legendFormat": "onboarding"
+        }
+      ],
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": ""},
+        "orientation": "horizontal",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": 0},
+              {"color": "yellow", "value": 0.8},
+              {"color": "green", "value": 0.95}
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "graph",
+      "title": "Onboarding Duration (p95)",
+      "gridPos": {"x": 8, "y": 1, "w": 8, "h": 6},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(workflow_run_duration_seconds_bucket{workflow=\"ApplicationOnboarding\", result=\"success\"}[5m])) by (le))",
+          "legendFormat": "p95"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Onboarding Retries",
+      "gridPos": {"x": 16, "y": 1, "w": 8, "h": 6},
+      "targets": [
+        {
+          "expr": "sum(rate(workflow_retries_total{workflow=\"ApplicationOnboarding\"}[5m]))",
+          "legendFormat": "retries/s"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Onboarding Domain Events",
+      "gridPos": {"x": 0, "y": 7, "w": 24, "h": 8},
+      "targets": [
+        {
+          "expr": "sum(rate(domain_events_total{event=~\"workflow_application_onboarding_.*\"}[5m])) by (event, result)",
+          "legendFormat": "{{event}} ({{result}})"
+        }
+      ]
+    },
+
+    {
+      "type": "row",
+      "title": "AppEnv Provisioning",
+      "gridPos": {"x": 0, "y": 15, "w": 24, "h": 1}
+    },
+    {
+      "type": "stat",
+      "title": "AppEnv Provisioning Success Rate",
+      "gridPos": {"x": 0, "y": 16, "w": 8, "h": 6},
+      "targets": [
+        {
+          "expr": "sum(rate(domain_events_total{event=\"workflow_appenv_provisioning_completed\", result=\"success\"}[15m])) / (sum(rate(domain_events_total{event=\"workflow_appenv_provisioning_completed\", result=\"success\"}[15m])) + sum(rate(domain_events_total{event=\"workflow_appenv_provisioning_failed\"}[15m])))",
+          "legendFormat": "appenv"
+        }
+      ],
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": ""},
+        "orientation": "horizontal",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": 0},
+              {"color": "yellow", "value": 0.8},
+              {"color": "green", "value": 0.95}
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "graph",
+      "title": "AppEnv Provisioning Duration (p95)",
+      "gridPos": {"x": 8, "y": 16, "w": 8, "h": 6},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(workflow_run_duration_seconds_bucket{workflow=\"ApplicationEnvironmentProvisioning\", result=\"success\"}[5m])) by (le))",
+          "legendFormat": "p95"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "AppEnv Provisioning Retries",
+      "gridPos": {"x": 16, "y": 16, "w": 8, "h": 6},
+      "targets": [
+        {
+          "expr": "sum(rate(workflow_retries_total{workflow=\"ApplicationEnvironmentProvisioning\"}[5m]))",
+          "legendFormat": "retries/s"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "AppEnv Provisioning Domain Events",
+      "gridPos": {"x": 0, "y": 22, "w": 24, "h": 8},
+      "targets": [
+        {
+          "expr": "sum(rate(domain_events_total{event=~\"workflow_appenv_provisioning_.*\"}[5m])) by (event, result)",
+          "legendFormat": "{{event}} ({{result}})"
+        }
+      ]
+    }
+  ]
+}

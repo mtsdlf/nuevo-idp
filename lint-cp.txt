@@ -1,0 +1,6 @@
+control-plane-api/internal/adapters/pgrepo/team.go:1: : # github.com/nuevo-idp/control-plane-api/internal/adapters/pgrepo
+internal/adapters/pgrepo/team.go:36:21: undefined: fmt
+internal/adapters/pgrepo/team.go:59:16: undefined: fmt (typecheck)
+package pgrepo
+1 issues:
+* typecheck: 1

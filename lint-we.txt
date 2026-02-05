@@ -1,0 +1,114 @@
+workflow-engine/cmd/engine/main.go:33:19: Error return value of `logger.Sync` is not checked (errcheck)
+	defer logger.Sync()
+	                 ^
+workflow-engine/internal/adapters/controlplanehttp/client.go:94:26: Error return value of `resp.Body.Close` is not checked (errcheck)
+    defer resp.Body.Close()
+                         ^
+workflow-engine/internal/adapters/controlplanehttp/client_test.go:12:14: Error return value of `os.Setenv` is not checked (errcheck)
+    os.Setenv("INTERNAL_AUTH_TOKEN", "test-token")
+             ^
+workflow-engine/internal/adapters/gitproviderhttp/client.go:65:26: Error return value of `resp.Body.Close` is not checked (errcheck)
+    defer resp.Body.Close()
+                         ^
+workflow-engine/internal/adapters/gitproviderhttp/client_test.go:50:11: Error return value of `os.Setenv` is not checked (errcheck)
+	os.Setenv("INTERNAL_AUTH_TOKEN", "test-token")
+	         ^
+workflow-engine/internal/adapters/secretbindingshttp/client.go:60:23: Error return value of `resp.Body.Close` is not checked (errcheck)
+	defer resp.Body.Close()
+	                     ^
+workflow-engine/internal/adapters/secretbindingshttp/client_test.go:29:11: Error return value of `os.Setenv` is not checked (errcheck)
+	os.Setenv("INTERNAL_AUTH_TOKEN", "test-token")
+	         ^
+workflow-engine/cmd/engine/main.go:71:13: G112: Potential Slowloris Attack because ReadHeaderTimeout is not configured in the http.Server (gosec)
+	server := &http.Server{Addr: ":8081", Handler: otelhttp.NewHandler(observability.InstrumentHTTP(mux), "workflow-engine")} 
+	           ^
+workflow-engine/internal/workflow/fitness_architecture_test.go:16:14: G304: Potential file inclusion via variable (gosec)
+	src, err := os.ReadFile(path)
+	            ^
+workflow-engine/internal/workflow/fitness_observability_test.go:17:14: G304: Potential file inclusion via variable (gosec)
+	src, err := os.ReadFile(path)
+	            ^
+workflow-engine/internal/workflow/fitness_observability_test.go:33:14: G304: Potential file inclusion via variable (gosec)
+	src, err := os.ReadFile(path)
+	            ^
+workflow-engine/internal/adapters/controlplanehttp/client.go:295:39: `comando` is a misspelling of `commando` (misspell)
+// MarkApplicationOnboarding llama al comando HTTP que mueve la Application a
+                                      ^
+workflow-engine/internal/adapters/controlplanehttp/client.go:324:33: `comando` is a misspelling of `commando` (misspell)
+// ActivateApplication llama al comando HTTP que mueve la Application a
+                                ^
+workflow-engine/internal/adapters/controlplanehttp/client.go:353:36: `comando` is a misspelling of `commando` (misspell)
+// CompleteSecretRotation llama al comando HTTP que mueve un Secret de Rotating
+                                   ^
+workflow-engine/internal/workflow/application_onboarding.go:25:53: `asume` is a misspelling of `assume` (misspell)
+// estado deseado. También es mínima: el workflow asume que las
+                                                    ^
+workflow-engine/internal/workflow/application_onboarding.go:237:32: `Asume` is a misspelling of `Assume` (misspell)
+// de la Application a Active. Asume que todas las precondiciones ya fueron
+                               ^
+workflow-engine/internal/workflow/fitness_architecture_test.go:11:20: `implementaciones` is a misspelling of `implementations` (misspell)
+// directamente de implementaciones concretas de puertos HTTP ni de
+                   ^
+workflow-engine/internal/workflow/application_onboarding.go:124:3: directive `//nolint:wrapcheck // propagamos el error tal cual para preservar el tipo de ApplicationError` is unused for linter "wrapcheck" (nolintlint)
+		//nolint:wrapcheck // propagamos el error tal cual para preservar el tipo de ApplicationError
+		^
+workflow-engine/cmd/engine/main.go:90:10: error returned from external package is unwrapped: sig: func go.temporal.io/sdk/client.Dial(options go.temporal.io/sdk/client.Options) (go.temporal.io/sdk/client.Client, error) (wrapcheck)
+		return err
+		       ^
+workflow-engine/cmd/engine/main.go:128:9: error returned from interface method should be wrapped: sig: func (go.temporal.io/sdk/worker.Worker).Run(interruptCh <-chan interface{}) error (wrapcheck)
+	return w.Run(worker.InterruptCh())
+	       ^
+workflow-engine/internal/adapters/appenvprovhttp/client.go:60:10: error returned from external package is unwrapped: sig: func encoding/json.Marshal(v any) ([]byte, error) (wrapcheck)
+		return err
+		       ^
+workflow-engine/internal/adapters/appenvprovhttp/client.go:65:10: error returned from external package is unwrapped: sig: func net/http.NewRequestWithContext(ctx context.Context, method string, url string, body io.Reader) (*net/http.Request, error) (wrapcheck)
+		return err
+		       ^
+workflow-engine/internal/adapters/appenvprovhttp/client.go:72:10: error returned from external package is unwrapped: sig: func (*net/http.Client).Do(req *net/http.Request) (*net/http.Response, error) (wrapcheck)
+		return err
+		       ^
+workflow-engine/internal/adapters/controlplanehttp/client.go:128:16: error returned from external package is unwrapped: sig: func encoding/json.Marshal(v any) ([]byte, error) (wrapcheck)
+        return err
+               ^
+workflow-engine/internal/adapters/controlplanehttp/client.go:133:16: error returned from external package is unwrapped: sig: func net/http.NewRequestWithContext(ctx context.Context, method string, url string, body io.Reader) (*net/http.Request, error) (wrapcheck)
+        return err
+               ^
+workflow-engine/internal/adapters/controlplanehttp/client.go:140:16: error returned from external package is unwrapped: sig: func (*net/http.Client).Do(req *net/http.Request) (*net/http.Response, error) (wrapcheck)
+        return err
+               ^
+workflow-engine/internal/adapters/controlplanehttp/client.go:303:16: error returned from external package is unwrapped: sig: func encoding/json.Marshal(v any) ([]byte, error) (wrapcheck)
+        return err
+               ^
+workflow-engine/internal/adapters/controlplanehttp/client.go:308:16: error returned from external package is unwrapped: sig: func net/http.NewRequestWithContext(ctx context.Context, method string, url string, body io.Reader) (*net/http.Request, error) (wrapcheck)
+        return err
+               ^
+workflow-engine/internal/adapters/controlplanehttp/client.go:315:16: error returned from external package is unwrapped: sig: func (*net/http.Client).Do(req *net/http.Request) (*net/http.Response, error) (wrapcheck)
+        return err
+               ^
+workflow-engine/internal/workflow/appenv_provisioning.go:246:9: error returned from interface method should be wrapped: sig: func (github.com/nuevo-idp/workflow-engine/internal/workflow.ControlPlaneAPI).CompleteApplicationEnvironmentProvisioning(ctx context.Context, appEnvID string) error (wrapcheck)
+	return err
+	       ^
+workflow-engine/internal/workflow/application_onboarding.go:78:10: error returned from external package is unwrapped: sig: func go.temporal.io/sdk/temporal.NewNonRetryableApplicationError(message string, errType string, cause error, details ...interface{}) error (wrapcheck)
+		return temporal.NewNonRetryableApplicationError("ApplicationID is required", "bad_input", nil)
+		       ^
+workflow-engine/internal/workflow/application_onboarding.go:164:9: error returned from external package is unwrapped: sig: func go.temporal.io/sdk/temporal.NewNonRetryableApplicationError(message string, errType string, cause error, details ...interface{}) error (wrapcheck)
+	return temporal.NewNonRetryableApplicationError("security scan timeout", "security_scan_timeout", nil)
+	       ^
+workflow-engine/internal/workflow/application_onboarding.go:258:10: error returned from external package is unwrapped: sig: func go.temporal.io/sdk/temporal.NewNonRetryableApplicationError(message string, errType string, cause error, details ...interface{}) error (wrapcheck)
+		return temporal.NewNonRetryableApplicationError("ApplicationID is required", "bad_input", nil)
+		       ^
+workflow-engine/internal/workflow/application_onboarding.go:273:10: error returned from interface method should be wrapped: sig: func (go.temporal.io/sdk/internal.Future).Get(ctx go.temporal.io/sdk/internal.Context, valuePtr interface{}) error (wrapcheck)
+		return err
+		       ^
+workflow-engine/internal/workflow/secret_rotation.go:95:10: error returned from interface method should be wrapped: sig: func (go.temporal.io/sdk/internal.Future).Get(ctx go.temporal.io/sdk/internal.Context, valuePtr interface{}) error (wrapcheck)
+		return err
+		       ^
+workflow-engine/internal/workflow/secret_rotation.go:107:10: error returned from interface method should be wrapped: sig: func (go.temporal.io/sdk/internal.Future).Get(ctx go.temporal.io/sdk/internal.Context, valuePtr interface{}) error (wrapcheck)
+		return err
+		       ^
+36 issues:
+* errcheck: 7
+* gosec: 4
+* misspell: 6
+* nolintlint: 1
+* wrapcheck: 18

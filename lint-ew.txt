@@ -1,0 +1,288 @@
+execution-workers/cmd/worker/main.go:265: 265-331 lines are duplicate of `cmd/worker/main.go:333-399` (dupl)
+func handleAppEnvSecrets(baseLogger *zap.Logger, w http.ResponseWriter, r *http.Request) {
+	if !requireInternalAuth(w, r) {
+		return
+	}
+
+	ctx, span := tracing.StartSpan(r.Context(), "execution-workers.appenv.ProvisionSecrets")
+	defer span.End()
+
+	logger := observability.LoggerWithTrace(ctx, baseLogger)
+	if !httpx.RequireMethod(w, r, http.MethodPost) {
+		return
+	}
+
+	var req appEnvRequest
+	if !httpx.DecodeJSON(w, r, &req, "invalid json body") {
+		return
+	}
+	if req.ApplicationEnvironmentID == "" {
+		httpx.WriteText(w, http.StatusBadRequest, "applicationEnvironmentId is required")
+		return
+	}
+
+	appEnvID := req.ApplicationEnvironmentID
+	span.SetAttributes(attribute.String("appenv.id", appEnvID))
+
+	endpoint := config.Get("APPENV_SECRETS_ENDPOINT", "")
+	if endpoint == "" {
+		logger.Error("APPENV_SECRETS_ENDPOINT not configured")
+		observability.ObserveDomainEvent("appenv_secrets_provisioned", "error")
+		httpx.WriteText(w, http.StatusInternalServerError, "APPENV_SECRETS_ENDPOINT not configured")
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	body := bytes.NewBufferString("{\"applicationEnvironmentId\":\"" + appEnvID + "\"}")
+	reqOut, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, body)
+	if err != nil {
+		logger.Error("error creating appenv secrets request", zap.Error(err))
+		observability.ObserveDomainEvent("appenv_secrets_provisioned", "error")
+		httpx.WriteText(w, http.StatusBadGateway, "failed to provision appenv secrets")
+		return
+	}
+	reqOut.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(reqOut)
+	if err != nil {
+		logger.Error("error calling appenv secrets endpoint", zap.Error(err))
+		observability.ObserveDomainEvent("appenv_secrets_provisioned", "error")
+		httpx.WriteText(w, http.StatusBadGateway, "failed to provision appenv secrets")
+		return
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		logger.Error("appenv secrets endpoint returned non-2xx", zap.Int("status", resp.StatusCode))
+		observability.ObserveDomainEvent("appenv_secrets_provisioned", "error")
+		httpx.WriteText(w, http.StatusBadGateway, "failed to provision appenv secrets")
+		return
+	}
+
+	observability.ObserveDomainEvent("appenv_secrets_provisioned", "success")
+	w.WriteHeader(http.StatusAccepted)
+}
+execution-workers/cmd/worker/main.go:333: 333-399 lines are duplicate of `cmd/worker/main.go:401-467` (dupl)
+func handleAppEnvSecretBindings(baseLogger *zap.Logger, w http.ResponseWriter, r *http.Request) {
+	if !requireInternalAuth(w, r) {
+		return
+	}
+
+	ctx, span := tracing.StartSpan(r.Context(), "execution-workers.appenv.CreateSecretBindings")
+	defer span.End()
+
+	logger := observability.LoggerWithTrace(ctx, baseLogger)
+	if !httpx.RequireMethod(w, r, http.MethodPost) {
+		return
+	}
+
+	var req appEnvRequest
+	if !httpx.DecodeJSON(w, r, &req, "invalid json body") {
+		return
+	}
+	if req.ApplicationEnvironmentID == "" {
+		httpx.WriteText(w, http.StatusBadRequest, "applicationEnvironmentId is required")
+		return
+	}
+
+	appEnvID := req.ApplicationEnvironmentID
+	span.SetAttributes(attribute.String("appenv.id", appEnvID))
+
+	endpoint := config.Get("APPENV_SECRET_BINDINGS_ENDPOINT", "")
+	if endpoint == "" {
+		logger.Error("APPENV_SECRET_BINDINGS_ENDPOINT not configured")
+		observability.ObserveDomainEvent("appenv_secret_bindings_created", "error")
+		httpx.WriteText(w, http.StatusInternalServerError, "APPENV_SECRET_BINDINGS_ENDPOINT not configured")
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	body := bytes.NewBufferString("{\"applicationEnvironmentId\":\"" + appEnvID + "\"}")
+	reqOut, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, body)
+	if err != nil {
+		logger.Error("error creating appenv secret bindings request", zap.Error(err))
+		observability.ObserveDomainEvent("appenv_secret_bindings_created", "error")
+		httpx.WriteText(w, http.StatusBadGateway, "failed to create appenv secret bindings")
+		return
+	}
+	reqOut.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(reqOut)
+	if err != nil {
+		logger.Error("error calling appenv secret bindings endpoint", zap.Error(err))
+		observability.ObserveDomainEvent("appenv_secret_bindings_created", "error")
+		httpx.WriteText(w, http.StatusBadGateway, "failed to create appenv secret bindings")
+		return
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		logger.Error("appenv secret bindings endpoint returned non-2xx", zap.Int("status", resp.StatusCode))
+		observability.ObserveDomainEvent("appenv_secret_bindings_created", "error")
+		httpx.WriteText(w, http.StatusBadGateway, "failed to create appenv secret bindings")
+		return
+	}
+
+	observability.ObserveDomainEvent("appenv_secret_bindings_created", "success")
+	w.WriteHeader(http.StatusAccepted)
+}
+execution-workers/cmd/worker/main.go:401: 401-467 lines are duplicate of `cmd/worker/main.go:265-331` (dupl)
+func handleAppEnvGitOpsVerify(baseLogger *zap.Logger, w http.ResponseWriter, r *http.Request) {
+	if !requireInternalAuth(w, r) {
+		return
+	}
+
+	ctx, span := tracing.StartSpan(r.Context(), "execution-workers.appenv.VerifyGitOpsReconciliation")
+	defer span.End()
+
+	logger := observability.LoggerWithTrace(ctx, baseLogger)
+	if !httpx.RequireMethod(w, r, http.MethodPost) {
+		return
+	}
+
+	var req appEnvRequest
+	if !httpx.DecodeJSON(w, r, &req, "invalid json body") {
+		return
+	}
+	if req.ApplicationEnvironmentID == "" {
+		httpx.WriteText(w, http.StatusBadRequest, "applicationEnvironmentId is required")
+		return
+	}
+
+	appEnvID := req.ApplicationEnvironmentID
+	span.SetAttributes(attribute.String("appenv.id", appEnvID))
+
+	endpoint := config.Get("APPENV_GITOPS_VERIFY_ENDPOINT", "")
+	if endpoint == "" {
+		logger.Error("APPENV_GITOPS_VERIFY_ENDPOINT not configured")
+		observability.ObserveDomainEvent("appenv_gitops_verified", "error")
+		httpx.WriteText(w, http.StatusInternalServerError, "APPENV_GITOPS_VERIFY_ENDPOINT not configured")
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	body := bytes.NewBufferString("{\"applicationEnvironmentId\":\"" + appEnvID + "\"}")
+	reqOut, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, body)
+	if err != nil {
+		logger.Error("error creating appenv gitops verify request", zap.Error(err))
+		observability.ObserveDomainEvent("appenv_gitops_verified", "error")
+		httpx.WriteText(w, http.StatusBadGateway, "failed to verify appenv gitops reconciliation")
+		return
+	}
+	reqOut.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(reqOut)
+	if err != nil {
+		logger.Error("error calling appenv gitops verify endpoint", zap.Error(err))
+		observability.ObserveDomainEvent("appenv_gitops_verified", "error")
+		httpx.WriteText(w, http.StatusBadGateway, "failed to verify appenv gitops reconciliation")
+		return
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		logger.Error("appenv gitops verify endpoint returned non-2xx", zap.Int("status", resp.StatusCode))
+		observability.ObserveDomainEvent("appenv_gitops_verified", "error")
+		httpx.WriteText(w, http.StatusBadGateway, "failed to verify appenv gitops reconciliation")
+		return
+	}
+
+	observability.ObserveDomainEvent("appenv_gitops_verified", "success")
+	w.WriteHeader(http.StatusAccepted)
+}
+execution-workers/cmd/worker/main_test.go:89: 89-108 lines are duplicate of `cmd/worker/main_test.go:110-129` (dupl)
+func TestHandleAppEnvHandlers_InvalidJSON(t *testing.T) {
+	handlers := []http.HandlerFunc{
+		func(w http.ResponseWriter, r *http.Request) { handleAppEnvBranchProtection(zap.NewNop(), w, r) },
+		func(w http.ResponseWriter, r *http.Request) { handleAppEnvSecrets(zap.NewNop(), w, r) },
+		func(w http.ResponseWriter, r *http.Request) { handleAppEnvSecretBindings(zap.NewNop(), w, r) },
+		func(w http.ResponseWriter, r *http.Request) { handleAppEnvGitOpsVerify(zap.NewNop(), w, r) },
+	}
+
+	for _, h := range handlers {
+		body := bytes.NewBufferString("not-json")
+		req := httptest.NewRequest(http.MethodPost, "/", body)
+		rec := httptest.NewRecorder()
+
+		h(rec, req)
+
+		if rec.Code != http.StatusBadRequest {
+			t.Fatalf("expected %d, got %d", http.StatusBadRequest, rec.Code)
+		}
+	}
+}
+execution-workers/cmd/worker/main_test.go:110: 110-129 lines are duplicate of `cmd/worker/main_test.go:89-108` (dupl)
+func TestHandleAppEnvHandlers_MissingID(t *testing.T) {
+	handlers := []http.HandlerFunc{
+		func(w http.ResponseWriter, r *http.Request) { handleAppEnvBranchProtection(zap.NewNop(), w, r) },
+		func(w http.ResponseWriter, r *http.Request) { handleAppEnvSecrets(zap.NewNop(), w, r) },
+		func(w http.ResponseWriter, r *http.Request) { handleAppEnvSecretBindings(zap.NewNop(), w, r) },
+		func(w http.ResponseWriter, r *http.Request) { handleAppEnvGitOpsVerify(zap.NewNop(), w, r) },
+	}
+
+	for _, h := range handlers {
+		body := bytes.NewBufferString(`{"applicationEnvironmentId":""}`)
+		req := httptest.NewRequest(http.MethodPost, "/", body)
+		rec := httptest.NewRecorder()
+
+		h(rec, req)
+
+		if rec.Code != http.StatusBadRequest {
+			t.Fatalf("expected %d, got %d", http.StatusBadRequest, rec.Code)
+		}
+	}
+}
+execution-workers/cmd/worker/main_test.go:131: 131-158 lines are duplicate of `cmd/worker/main_test.go:160-187` (dupl)
+func TestHandleAppEnvHandlers_AcceptsValidRequest(t *testing.T) {
+	called := false
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		called = true
+		if r.Method != http.MethodPost {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		w.WriteHeader(http.StatusAccepted)
+	}))
+	t.Cleanup(server.Close)
+
+	_ = os.Setenv("APPENV_GITOPS_VERIFY_ENDPOINT", server.URL)
+	t.Cleanup(func() { _ = os.Unsetenv("APPENV_GITOPS_VERIFY_ENDPOINT") })
+
+	body := bytes.NewBufferString(`{"applicationEnvironmentId":"ae-1"}`)
+	req := httptest.NewRequest(http.MethodPost, "/appenv/gitops-verify", body)
+	rec := httptest.NewRecorder()
+
+	handleAppEnvGitOpsVerify(zap.NewNop(), rec, req)
+
+	if rec.Code != http.StatusAccepted {
+		t.Fatalf("expected %d, got %d", http.StatusAccepted, rec.Code)
+	}
+	if !called {
+		t.Fatalf("expected endpoint to be called")
+	}
+}
+execution-workers/cmd/worker/main_test.go:354:11: Error return value of `os.Setenv` is not checked (errcheck)
+	os.Setenv("INTERNAL_AUTH_TOKEN", "test-token")
+	         ^
+execution-workers/cmd/worker/main_test.go:369:11: Error return value of `os.Setenv` is not checked (errcheck)
+	os.Setenv("INTERNAL_AUTH_TOKEN", "test-token")
+	         ^
+execution-workers/cmd/worker/main.go:518:2: ifElseChain: rewrite if-else to switch statement (gocritic)
+	if bindingsEndpoint == "" {
+	^
+9 issues:
+* dupl: 6
+* errcheck: 2
+* gocritic: 1

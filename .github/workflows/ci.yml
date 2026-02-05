@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test-lint-smoke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        run: docker compose version
+
+      - name: Run control-plane-api tests
+        working-directory: infra
+        run: docker compose -f docker-compose.yml run --rm control-plane-api-tests
+
+      - name: Run workflow-engine tests
+        working-directory: infra
+        run: docker compose -f docker-compose.yml run --rm workflow-engine-tests
+
+      - name: Run execution-workers tests
+        working-directory: infra
+        run: docker compose -f docker-compose.yml run --rm execution-workers-tests
+
+      - name: Run golangci-lint
+        working-directory: infra
+        run: docker compose -f docker-compose.yml run --rm golangci-lint
+
+      - name: Run smoke tests
+        working-directory: infra
+        run: docker compose -f docker-compose.yml run --rm smoke-tests

@@ -1,0 +1,324 @@
+{
+  "id": null,
+  "uid": "idp-observability",
+  "title": "IDP Observability",
+  "tags": ["idp"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "type": "query",
+        "label": "Service",
+        "datasource": "Prometheus",
+        "query": "label_values(http_requests_total, service)",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "current": {"text": "All", "value": "__all"}
+      },
+      {
+        "name": "env",
+        "type": "query",
+        "label": "Environment",
+        "datasource": "Prometheus",
+        "query": "label_values(http_requests_total, env)",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "current": {"text": "All", "value": "__all"}
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Error Rate (5xx) by Service",
+      "gridPos": {"x": 0, "y": 0, "w": 8, "h": 6},
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{status=~\"5..\", service=~\"$service\", env=~\"$env\"}[5m])) by (service) / sum(rate(http_requests_total{service=~\"$service\", env=~\"$env\"}[5m])) by (service)",
+          "legendFormat": "{{service}}"
+        }
+      ],
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": ""},
+        "orientation": "horizontal",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "links": [
+            {
+              "title": "Ver trazas en Tempo",
+              "url": "/explore?left=%5B%22now-1h%22,%22now%22,%22Tempo%22,%7B%22query%22:%22service.name%3D%5C"$service%5C"%22%7D%5D"
+            },
+            {
+              "title": "Ver métricas en Explore",
+              "url": "/explore?left=%5B%22now-1h%22,%22now%22,%22Prometheus%22,%7B%22expr%22:%22sum(rate(http_requests_total%7Bservice%3D~%5C\"$service%5C\",env%3D~%5C\"$env%5C\"%7D%5B5m%5D))%22%7D%5D"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 0.01},
+              {"color": "red", "value": 0.05}
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "HTTP Request Rate",
+      "gridPos": {"x": 8, "y": 0, "w": 8, "h": 6},
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{service=~\"$service\", env=~\"$env\"}[5m]))",
+          "legendFormat": "req/s"
+        }
+      ],
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": ""},
+        "orientation": "horizontal",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "req/s",
+          "links": [
+            {
+              "title": "Ver métricas en Explore",
+              "url": "/explore?left=%5B%22now-1h%22,%22now%22,%22Prometheus%22,%7B%22expr%22:%22sum(rate(http_requests_total%7Bservice%3D~%5C\"$service%5C\",env%3D~%5C\"$env%5C\"%7D%5B5m%5D))%20by%20(service,route,method)%22%7D%5D"
+            }
+          ]
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "HTTP Latency p95",
+      "gridPos": {"x": 16, "y": 0, "w": 8, "h": 6},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=~\"$service\", env=~\"$env\"}[5m])) by (le))",
+          "legendFormat": "p95"
+        }
+      ],
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": ""},
+        "orientation": "horizontal",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "links": [
+            {
+              "title": "Ver trazas en Tempo",
+              "url": "/explore?left=%5B%22now-1h%22,%22now%22,%22Tempo%22,%7B%22query%22:%22service.name%3D%5C"$service%5C"%22%7D%5D"
+            }
+          ]
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "graph",
+      "title": "HTTP Requests by Route",
+      "gridPos": {"x": 0, "y": 6, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{service=~\"$service\", env=~\"$env\"}[5m])) by (service, route, method)",
+          "legendFormat": "{{service}} {{method}} {{route}}"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "HTTP Latency (p95) by Route",
+      "gridPos": {"x": 12, "y": 6, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=~\"$service\", env=~\"$env\"}[5m])) by (le, service, route, method))",
+          "legendFormat": "{{service}} {{method}} {{route}}"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Application Onboarding Success Rate",
+      "gridPos": {"x": 0, "y": 14, "w": 8, "h": 6},
+      "targets": [
+        {
+          "expr": "sum(rate(domain_events_total{event=\"workflow_application_onboarding_completed\", result=\"success\"}[15m])) / (sum(rate(domain_events_total{event=\"workflow_application_onboarding_completed\", result=\"success\"}[15m])) + sum(rate(domain_events_total{event=\"workflow_application_onboarding_failed\"}[15m])))",
+          "legendFormat": "onboarding"
+        }
+      ],
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": ""},
+        "orientation": "horizontal",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": 0},
+              {"color": "yellow", "value": 0.8},
+              {"color": "green", "value": 0.95}
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "AppEnv Provisioning Success Rate",
+      "gridPos": {"x": 8, "y": 14, "w": 8, "h": 6},
+      "targets": [
+        {
+          "expr": "sum(rate(domain_events_total{event=\"workflow_appenv_provisioning_completed\", result=\"success\"}[15m])) / (sum(rate(domain_events_total{event=\"workflow_appenv_provisioning_completed\", result=\"success\"}[15m])) + sum(rate(domain_events_total{event=\"workflow_appenv_provisioning_failed\"}[15m])))",
+          "legendFormat": "appenv"
+        }
+      ],
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": ""},
+        "orientation": "horizontal",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": 0},
+              {"color": "yellow", "value": 0.8},
+              {"color": "green", "value": 0.95}
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Secret Rotation Success Rate",
+      "gridPos": {"x": 16, "y": 14, "w": 8, "h": 6},
+      "targets": [
+        {
+          "expr": "sum(rate(domain_events_total{event=\"workflow_secret_rotation_completed\", result=\"success\"}[15m])) / (sum(rate(domain_events_total{event=\"workflow_secret_rotation_completed\", result=\"success\"}[15m])) + sum(rate(domain_events_total{event=\"workflow_secret_rotation_failed\"}[15m])))",
+          "legendFormat": "rotation"
+        }
+      ],
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": ""},
+        "orientation": "horizontal",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": 0},
+              {"color": "yellow", "value": 0.8},
+              {"color": "green", "value": 0.95}
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "graph",
+      "title": "Workflow Duration (p95) by Workflow",
+      "gridPos": {"x": 0, "y": 20, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(workflow_run_duration_seconds_bucket{result=\"success\"}[5m])) by (le, workflow))",
+          "legendFormat": "{{workflow}}"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Workflow Retries by Workflow",
+      "gridPos": {"x": 12, "y": 20, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "sum(rate(workflow_retries_total[5m])) by (workflow)",
+          "legendFormat": "{{workflow}}"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Provider Error Rate (downstream)",
+      "gridPos": {"x": 0, "y": 28, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "sum(rate(downstream_errors_total[5m])) by (target, code, status)",
+          "legendFormat": "{{target}} {{code}} {{status}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "links": [
+            {
+              "title": "Ver trazas en Tempo",
+              "url": "/explore?left=%5B%22now-1h%22,%22now%22,%22Tempo%22,%7B%22query%22:%22service.name%3D%5C"workflow-engine%5C"%22%7D%5D"
+            }
+          ]
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "graph",
+      "title": "Domain Events",
+      "gridPos": {"x": 12, "y": 28, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "sum(rate(domain_events_total[5m])) by (event, result)",
+          "legendFormat": "{{event}} ({{result}})"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "links": [
+            {
+              "title": "Ver métricas en Explore",
+              "url": "/explore?left=%5B%22now-1h%22,%22now%22,%22Prometheus%22,%7B%22expr%22:%22sum(rate(domain_events_total%5B5m%5D))%20by%20(event,result)%22%7D%5D"
+            }
+          ]
+        },
+        "overrides": []
+      }
+    }
+  ]
+}
