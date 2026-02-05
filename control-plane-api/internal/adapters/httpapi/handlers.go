@@ -5,8 +5,8 @@ import (
 
 	"github.com/nuevo-idp/control-plane-api/internal/application"
 	"github.com/nuevo-idp/platform/config"
-	"github.com/nuevo-idp/platform/httpx"
 	perrors "github.com/nuevo-idp/platform/errors"
+	"github.com/nuevo-idp/platform/httpx"
 	"github.com/nuevo-idp/platform/observability"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"

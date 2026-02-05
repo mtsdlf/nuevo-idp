@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/nuevo-idp/workflow-engine/internal/adapters/controlplanehttp"
 	"github.com/nuevo-idp/platform/observability"
+	"github.com/nuevo-idp/workflow-engine/internal/adapters/controlplanehttp"
 	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
@@ -22,7 +22,9 @@ type ApplicationOnboardingInput struct {
 }
 
 // ApplicationActivationInput modela la intención "ApplicationActivation" del
-// estado deseado. También es mínima: el workflow asume que las //nolint:misspell // comentarios en español, "asume" es correcto
+// estado deseado.
+//nolint:misspell
+// También es mínima: el workflow asume que las
 // precondiciones (todos los ApplicationEnvironment activos) ya se cumplieron.
 type ApplicationActivationInput struct {
 	ApplicationID string
@@ -234,7 +236,9 @@ func TransitionApplicationToOnboarding(ctx context.Context, applicationID string
 }
 
 // ApplicationActivation es un workflow simple que realiza la transición final
-// de la Application a Active. Asume que todas las precondiciones ya fueron //nolint:misspell // comentarios en español, "Asume" es correcto
+// de la Application a Active.
+//nolint:misspell
+// Asume que todas las precondiciones ya fueron
 // validadas antes de dispararlo (por ejemplo, todos los ApplicationEnvironment
 // están en estado Active).
 func ApplicationActivation(ctx workflow.Context, input ApplicationActivationInput) (err error) {
@@ -296,7 +300,9 @@ func TransitionApplicationToActive(ctx context.Context, applicationID string) er
 //
 // Recibe una interfaz mínima compatible con el logger de Temporal
 // (que expone Error(msg string, keysAndValues ...interface{})).
-func logControlPlaneErrorIfAny(logger interface{ Error(msg string, keysAndValues ...interface{}) }, err error, op string) {
+func logControlPlaneErrorIfAny(logger interface {
+	Error(msg string, keysAndValues ...interface{})
+}, err error, op string) {
 	if err == nil {
 		return
 	}

@@ -44,17 +44,17 @@ const (
 	DeploymentRepositoryStateActive       DeploymentRepositoryState = "Active"
 	DeploymentRepositoryStateArchived     DeploymentRepositoryState = "Archived"
 
-	EnvironmentStatePlanned  EnvironmentState = "Planned"
-	EnvironmentStateActive   EnvironmentState = "Active"
-	EnvironmentStateFrozen   EnvironmentState = "Frozen"
-	EnvironmentStateRetired  EnvironmentState = "Retired"
+	EnvironmentStatePlanned EnvironmentState = "Planned"
+	EnvironmentStateActive  EnvironmentState = "Active"
+	EnvironmentStateFrozen  EnvironmentState = "Frozen"
+	EnvironmentStateRetired EnvironmentState = "Retired"
 
-	ApplicationEnvironmentStateDeclared       ApplicationEnvironmentState = "Declared"
-	ApplicationEnvironmentStateProvisioning   ApplicationEnvironmentState = "Provisioning"
-	ApplicationEnvironmentStateActive         ApplicationEnvironmentState = "Active"
-	ApplicationEnvironmentStateFrozen         ApplicationEnvironmentState = "Frozen"
+	ApplicationEnvironmentStateDeclared        ApplicationEnvironmentState = "Declared"
+	ApplicationEnvironmentStateProvisioning    ApplicationEnvironmentState = "Provisioning"
+	ApplicationEnvironmentStateActive          ApplicationEnvironmentState = "Active"
+	ApplicationEnvironmentStateFrozen          ApplicationEnvironmentState = "Frozen"
 	ApplicationEnvironmentStateDecommissioning ApplicationEnvironmentState = "Decommissioning"
-	ApplicationEnvironmentStateRetired        ApplicationEnvironmentState = "Retired"
+	ApplicationEnvironmentStateRetired         ApplicationEnvironmentState = "Retired"
 
 	SecretStateDeclared     SecretState = "Declared"
 	SecretStateProvisioning SecretState = "Provisioning"
@@ -103,21 +103,21 @@ type CodeRepository struct {
 // El modelo deseado incluye el campo deploymentModel, que dejamos como string
 // para no acoplar aún a un enum específico.
 type DeploymentRepository struct {
-	ID            string                     `json:"id"`
-	ApplicationID string                     `json:"applicationId"`
-	DeploymentModel string                  `json:"deploymentModel"`
-	State         DeploymentRepositoryState `json:"state"`
-	Metadata      Metadata                  `json:"metadata"`
+	ID              string                    `json:"id"`
+	ApplicationID   string                    `json:"applicationId"`
+	DeploymentModel string                    `json:"deploymentModel"`
+	State           DeploymentRepositoryState `json:"state"`
+	Metadata        Metadata                  `json:"metadata"`
 }
 
 // GitOpsIntegration vincula una Application con un DeploymentRepository específico.
 // En el ejemplo deseado es principalmente una relación, por lo que no modelamos
 // un estado explícito por ahora.
 type GitOpsIntegration struct {
-	ID                   string   `json:"id"`
-	ApplicationID        string   `json:"applicationId"`
-	DeploymentRepositoryID string `json:"deploymentRepositoryId"`
-	Metadata             Metadata `json:"metadata"`
+	ID                     string   `json:"id"`
+	ApplicationID          string   `json:"applicationId"`
+	DeploymentRepositoryID string   `json:"deploymentRepositoryId"`
+	Metadata               Metadata `json:"metadata"`
 }
 
 // Environment is a global environment (dev, staging, prod...).
@@ -133,11 +133,11 @@ type Environment struct {
 // - unique_application_environment_pair
 // - runtime_requires_active_application_environment
 type ApplicationEnvironment struct {
-	ID            string                     `json:"id"`
-	ApplicationID string                     `json:"applicationId"`
-	EnvironmentID string                     `json:"environmentId"`
+	ID            string                      `json:"id"`
+	ApplicationID string                      `json:"applicationId"`
+	EnvironmentID string                      `json:"environmentId"`
 	State         ApplicationEnvironmentState `json:"state"`
-	Metadata      Metadata                   `json:"metadata"`
+	Metadata      Metadata                    `json:"metadata"`
 }
 
 // Secret representa un secreto propiedad de un Team.
@@ -145,12 +145,12 @@ type ApplicationEnvironment struct {
 // - secret_must_have_owner_team
 // - revoked_secret_cannot_be_reactivated
 type Secret struct {
-	ID        string      `json:"id"`
-	OwnerTeam string      `json:"ownerTeamId"`
-	Purpose   string      `json:"purpose"`
-	Sensitivity string    `json:"sensitivity"`
-	State     SecretState `json:"state"`
-	Metadata  Metadata    `json:"metadata"`
+	ID          string      `json:"id"`
+	OwnerTeam   string      `json:"ownerTeamId"`
+	Purpose     string      `json:"purpose"`
+	Sensitivity string      `json:"sensitivity"`
+	State       SecretState `json:"state"`
+	Metadata    Metadata    `json:"metadata"`
 }
 
 // SecretBinding vincula un Secret con un recurso objetivo
@@ -158,10 +158,10 @@ type Secret struct {
 // Invariants a nivel de dominio:
 // - binding_requires_active_secret
 type SecretBinding struct {
-	ID        string             `json:"id"`
-	SecretID  string             `json:"secretId"`
-	TargetID  string             `json:"targetId"`
-	TargetType string            `json:"targetType"`
-	State     SecretBindingState `json:"state"`
-	Metadata  Metadata           `json:"metadata"`
+	ID         string             `json:"id"`
+	SecretID   string             `json:"secretId"`
+	TargetID   string             `json:"targetId"`
+	TargetType string             `json:"targetType"`
+	State      SecretBindingState `json:"state"`
+	Metadata   Metadata           `json:"metadata"`
 }

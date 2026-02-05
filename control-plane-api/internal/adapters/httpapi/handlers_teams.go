@@ -13,6 +13,7 @@ type createTeamRequest struct {
 	Name string `json:"name"`
 }
 
+//nolint:misspell
 func (s *Server) createTeam(w http.ResponseWriter, r *http.Request) { //nolint:dupl // handler HTTP pequeño y simétrico con otros; duplicación es intencional por claridad
 	if !httpx.RequireMethod(w, r, http.MethodPost) {
 		return

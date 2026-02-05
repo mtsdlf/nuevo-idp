@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	ErrTeamAlreadyExists             = perrors.Conflict("team_already_exists", "team already exists", nil)
-	ErrApplicationAlreadyExists      = perrors.Conflict("application_already_exists", "application already exists", nil)
+	ErrTeamAlreadyExists              = perrors.Conflict("team_already_exists", "team already exists", nil)
+	ErrApplicationAlreadyExists       = perrors.Conflict("application_already_exists", "application already exists", nil)
 	ErrApplicationEnvironmentNotFound = perrors.NotFound("application_environment_not_found", "application environment not found", nil)
 )
 
@@ -62,15 +62,15 @@ type GitOpsIntegrationRepository interface {
 }
 
 type Services struct {
-	Teams                  TeamRepository
-	Applications           ApplicationRepository
-	CodeRepositories       CodeRepositoryRepository
-	Environments           EnvironmentRepository
+	Teams                   TeamRepository
+	Applications            ApplicationRepository
+	CodeRepositories        CodeRepositoryRepository
+	Environments            EnvironmentRepository
 	ApplicationEnvironments ApplicationEnvironmentRepository
-	Secrets                SecretRepository
-	SecretBindings         SecretBindingRepository
-	DeploymentRepositories DeploymentRepositoryRepository
-	GitOpsIntegrations     GitOpsIntegrationRepository
+	Secrets                 SecretRepository
+	SecretBindings          SecretBindingRepository
+	DeploymentRepositories  DeploymentRepositoryRepository
+	GitOpsIntegrations      GitOpsIntegrationRepository
 }
 
 func (s *Services) GetApplication(ctx context.Context, id string) (*domain.Application, error) {
@@ -478,8 +478,8 @@ func (s *Services) DeclareGitOpsIntegration(ctx context.Context, id, application
 	}
 
 	gi := &domain.GitOpsIntegration{
-		ID:                    id,
-		ApplicationID:         applicationID,
+		ID:                     id,
+		ApplicationID:          applicationID,
 		DeploymentRepositoryID: deploymentRepoID,
 		Metadata: domain.Metadata{
 			CreatedBy: createdBy,
@@ -516,11 +516,11 @@ func (s *Services) CreateSecret(ctx context.Context, id, ownerTeamID, purpose, s
 	}
 
 	secret := &domain.Secret{
-		ID:         id,
-		OwnerTeam:  ownerTeamID,
-		Purpose:    purpose,
+		ID:          id,
+		OwnerTeam:   ownerTeamID,
+		Purpose:     purpose,
 		Sensitivity: sensitivity,
-		State:      domain.SecretStateDeclared,
+		State:       domain.SecretStateDeclared,
 		Metadata: domain.Metadata{
 			CreatedBy: createdBy,
 			CreatedAt: time.Now().UTC(),
@@ -609,11 +609,11 @@ func (s *Services) DeclareSecretBinding(ctx context.Context, id, secretID, targe
 	}
 
 	binding := &domain.SecretBinding{
-		ID:        id,
-		SecretID:  secretID,
-		TargetID:  targetID,
+		ID:         id,
+		SecretID:   secretID,
+		TargetID:   targetID,
 		TargetType: targetType,
-		State:     domain.SecretBindingStateDeclared,
+		State:      domain.SecretBindingStateDeclared,
 		Metadata: domain.Metadata{
 			CreatedBy: createdBy,
 			CreatedAt: time.Now().UTC(),

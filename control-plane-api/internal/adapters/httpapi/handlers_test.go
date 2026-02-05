@@ -22,9 +22,9 @@ func newTestServer() (*Server, *memoryrepo.TeamRepository, *memoryrepo.Applicati
 	appEnvRepo := memoryrepo.NewApplicationEnvironmentRepository()
 	secretRepo := memoryrepo.NewSecretRepository()
 	secretBindingRepo := memoryrepo.NewSecretBindingRepository()
- 	codeRepo := memoryrepo.NewCodeRepositoryRepository()
- 	depRepo := memoryrepo.NewDeploymentRepositoryRepository()
- 	gitopsRepo := memoryrepo.NewGitOpsIntegrationRepository()
+	codeRepo := memoryrepo.NewCodeRepositoryRepository()
+	depRepo := memoryrepo.NewDeploymentRepositoryRepository()
+	gitopsRepo := memoryrepo.NewGitOpsIntegrationRepository()
 
 	services := &application.Services{
 		Teams:                   teamRepo,
@@ -655,13 +655,13 @@ func TestGetApplicationQuery_ReturnsApplication(t *testing.T) {
 	ctx := httptest.NewRequest("", "/", nil).Context()
 
 	if err := server.services.CreateTeam(ctx, "team-1", "Platform", "test"); err != nil {
-			f.Fatalf("CreateTeam failed: %v", err)
+		f.Fatalf("CreateTeam failed: %v", err)
 	}
 	if err := server.services.CreateApplication(ctx, "app-1", "App", "team-1", "test"); err != nil {
-			f.Fatalf("CreateApplication failed: %v", err)
+		f.Fatalf("CreateApplication failed: %v", err)
 	}
 	if _, err := appRepo.GetByID(ctx, "app-1"); err != nil {
-			f.Fatalf("expected app to exist, got error: %v", err)
+		f.Fatalf("expected app to exist, got error: %v", err)
 	}
 
 	req := httptest.NewRequest(http.MethodGet, "/queries/applications?id=app-1", nil)
@@ -670,6 +670,6 @@ func TestGetApplicationQuery_ReturnsApplication(t *testing.T) {
 	mux.ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusOK {
-			f.Fatalf("expected %d, got %d", http.StatusOK, rec.Code)
+		f.Fatalf("expected %d, got %d", http.StatusOK, rec.Code)
 	}
 }

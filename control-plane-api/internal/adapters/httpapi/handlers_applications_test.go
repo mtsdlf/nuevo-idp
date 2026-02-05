@@ -534,4 +534,3 @@ func TestStartApplicationOnboardingEndpoint_RequiresInternalAuth(t *testing.T) {
 		t.Fatalf("expected %d when missing internal auth token, got %d", http.StatusUnauthorized, rec.Code)
 	}
 }
-

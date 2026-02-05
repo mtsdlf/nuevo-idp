@@ -23,6 +23,7 @@ type completeApplicationEnvironmentProvisioningRequest struct {
 	ID string `json:"id"`
 }
 
+//nolint:misspell
 func (s *Server) createEnvironment(w http.ResponseWriter, r *http.Request) { //nolint:dupl // handler HTTP pequeño y simétrico con otros; duplicación es intencional por claridad
 	if !httpx.RequireMethod(w, r, http.MethodPost) {
 		return
@@ -50,6 +51,7 @@ func (s *Server) createEnvironment(w http.ResponseWriter, r *http.Request) { //n
 	w.WriteHeader(http.StatusCreated)
 }
 
+//nolint:misspell
 func (s *Server) declareApplicationEnvironment(w http.ResponseWriter, r *http.Request) { //nolint:dupl // handler HTTP pequeño y simétrico con otros; duplicación es intencional por claridad
 	if !httpx.RequireMethod(w, r, http.MethodPost) {
 		return
@@ -77,6 +79,7 @@ func (s *Server) declareApplicationEnvironment(w http.ResponseWriter, r *http.Re
 	w.WriteHeader(http.StatusCreated)
 }
 
+//nolint:misspell
 func (s *Server) completeApplicationEnvironmentProvisioning(w http.ResponseWriter, r *http.Request) { //nolint:dupl // handler HTTP pequeño y simétrico con otros; duplicación es intencional por claridad
 	if !requireInternalAuth(w, r) {
 		return

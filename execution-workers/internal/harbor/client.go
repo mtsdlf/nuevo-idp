@@ -46,9 +46,9 @@ func NewClientFromEnv() (*Client, error) {
 	}
 
 	return &Client{
-		baseURL:  baseURL,
-		username: username,
-		password: password,
+		baseURL:    baseURL,
+		username:   username,
+		password:   password,
 		httpClient: &http.Client{Timeout: 15 * time.Second},
 	}, nil
 }

@@ -26,7 +26,7 @@ type appEnvPayload struct {
 
 func NewClient(baseURL string) *Client {
 	return &Client{
-		baseURL: baseURL,
+		baseURL:    baseURL,
 		httpClient: &http.Client{Timeout: 15 * time.Second},
 	}
 }

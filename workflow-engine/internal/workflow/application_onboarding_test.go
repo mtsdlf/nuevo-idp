@@ -231,10 +231,10 @@ func TestApplicationOnboarding_FailsOnControlPlaneDomainError(t *testing.T) {
 }
 
 type fakeApplicationOnboardingPort struct {
-	codeRepoCalls             int
-	deploymentRepoCalls       int
-	gitOpsIntegrationCalls    int
-	appEnvDeclarationCalls    int
+	codeRepoCalls              int
+	deploymentRepoCalls        int
+	gitOpsIntegrationCalls     int
+	appEnvDeclarationCalls     int
 	applicationOnboardingCalls int
 	applicationActivationCalls int
 }
@@ -268,5 +268,5 @@ func (f *fakeApplicationOnboardingPort) ActivateApplication(_ context.Context, _
 	f.applicationActivationCalls++
 	return nil
 }
-// ApplicationActivation workflows
 
+// ApplicationActivation workflows

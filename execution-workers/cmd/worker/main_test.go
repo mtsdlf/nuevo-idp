@@ -77,7 +77,7 @@ func TestHandleAppEnvHandlers_MethodNotAllowed(t *testing.T) {
 		rec := httptest.NewRecorder()
 
 		t.Run(tc.name, func(t *testing.T) {
-				tc.h(rec, req)
+			tc.h(rec, req)
 
 			if rec.Code != http.StatusMethodNotAllowed {
 				t.Fatalf("expected %d, got %d", http.StatusMethodNotAllowed, rec.Code)
@@ -351,7 +351,7 @@ func TestHandleSecretBindingsUpdate_RotatesHarborAndCallsBindingsEndpoint(t *tes
 }
 
 func TestHandleCreateGitHubRepo_RequiresInternalAuth(t *testing.T) {
-	os.Setenv("INTERNAL_AUTH_TOKEN", "test-token")
+	_ = os.Setenv("INTERNAL_AUTH_TOKEN", "test-token")
 	t.Cleanup(func() { _ = os.Unsetenv("INTERNAL_AUTH_TOKEN") })
 
 	body := bytes.NewBufferString(`{"owner":"me","name":"repo","private":true}`)
@@ -366,7 +366,7 @@ func TestHandleCreateGitHubRepo_RequiresInternalAuth(t *testing.T) {
 }
 
 func TestHandleSecretBindingsUpdate_RequiresInternalAuth(t *testing.T) {
-	os.Setenv("INTERNAL_AUTH_TOKEN", "test-token")
+	_ = os.Setenv("INTERNAL_AUTH_TOKEN", "test-token")
 	t.Cleanup(func() { _ = os.Unsetenv("INTERNAL_AUTH_TOKEN") })
 
 	req := httptest.NewRequest(http.MethodPost, "/secrets/bindings/update", bytes.NewBufferString(`{"secretId":"sec-1"}`))

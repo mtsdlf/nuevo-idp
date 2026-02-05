@@ -12,11 +12,11 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel/attribute"
 
+	"github.com/nuevo-idp/execution-workers/internal/harbor"
 	"github.com/nuevo-idp/platform/config"
 	"github.com/nuevo-idp/platform/httpx"
 	"github.com/nuevo-idp/platform/observability"
 	"github.com/nuevo-idp/platform/tracing"
-	"github.com/nuevo-idp/execution-workers/internal/harbor"
 	"go.uber.org/zap"
 	"golang.org/x/oauth2"
 )

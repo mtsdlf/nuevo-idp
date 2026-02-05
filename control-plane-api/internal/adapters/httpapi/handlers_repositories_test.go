@@ -119,7 +119,7 @@ func TestDeclareGitOpsIntegrationEndpoint_CreatesIntegration(t *testing.T) {
 
 	gi, err := gitopsRepo.GetByID(ctx, "gi-1")
 	if err != nil || gi == nil {
-			 t.Fatalf("expected gitops integration to be created, got err=%v gi=%v", err, gi)
+		t.Fatalf("expected gitops integration to be created, got err=%v gi=%v", err, gi)
 	}
 }
 
@@ -138,14 +138,14 @@ func TestDeclareCodeRepositoryEndpoint_FailsWhenApplicationNotFound(t *testing.T
 	mux.ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusNotFound {
-		 t.Fatalf("expected %d when application is missing, got %d", http.StatusNotFound, rec.Code)
+		t.Fatalf("expected %d when application is missing, got %d", http.StatusNotFound, rec.Code)
 	}
 	var errPayload map[string]string
 	if err := json.Unmarshal(rec.Body.Bytes(), &errPayload); err != nil {
-		 t.Fatalf("expected JSON error payload, got %v", err)
+		t.Fatalf("expected JSON error payload, got %v", err)
 	}
 	if errPayload["code"] != "application_not_found" {
-		 t.Fatalf("expected error code 'application_not_found', got %q", errPayload["code"])
+		t.Fatalf("expected error code 'application_not_found', got %q", errPayload["code"])
 	}
 }
 
@@ -198,8 +198,8 @@ func TestDeclareDeploymentRepositoryEndpoint_FailsWhenApplicationNotFound(t *tes
 	mux := server.Routes()
 
 	body, _ := json.Marshal(map[string]string{
-		"id":            "dep-1",
-		"applicationId": "does-not-exist",
+		"id":              "dep-1",
+		"applicationId":   "does-not-exist",
 		"deploymentModel": "GitOpsPerApplication",
 	})
 
@@ -435,4 +435,3 @@ func TestDeclareGitOpsIntegrationEndpoint_FailsWhenDuplicateID(t *testing.T) {
 		t.Fatalf("expected error code 'gitops_integration_already_exists', got %q", errPayload["code"])
 	}
 }
-

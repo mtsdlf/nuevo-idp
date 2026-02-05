@@ -73,15 +73,15 @@ func main() {
 	gitopsRepo := memoryrepo.NewGitOpsIntegrationRepository()
 
 	services := &application.Services{
-		Teams:                  teamRepo,
-		Applications:           appRepo,
-		CodeRepositories:       codeRepo,
-		Environments:           envRepo,
+		Teams:                   teamRepo,
+		Applications:            appRepo,
+		CodeRepositories:        codeRepo,
+		Environments:            envRepo,
 		ApplicationEnvironments: appEnvRepo,
-		Secrets:                secretRepo,
-		SecretBindings:         secretBindingRepo,
-		DeploymentRepositories: depRepo,
-		GitOpsIntegrations:     gitopsRepo,
+		Secrets:                 secretRepo,
+		SecretBindings:          secretBindingRepo,
+		DeploymentRepositories:  depRepo,
+		GitOpsIntegrations:      gitopsRepo,
 	}
 
 	server := httpapi.NewServer(services, logger)

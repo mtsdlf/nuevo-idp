@@ -30,6 +30,7 @@ type activateApplicationRequest struct {
 	ID string `json:"id"`
 }
 
+//nolint:misspell
 func (s *Server) createApplication(w http.ResponseWriter, r *http.Request) { //nolint:dupl // handler HTTP pequeño y simétrico con otros; duplicación es intencional por claridad
 	if !httpx.RequireMethod(w, r, http.MethodPost) {
 		return
@@ -57,6 +58,7 @@ func (s *Server) createApplication(w http.ResponseWriter, r *http.Request) { //n
 	w.WriteHeader(http.StatusCreated)
 }
 
+//nolint:misspell
 func (s *Server) approveApplication(w http.ResponseWriter, r *http.Request) { //nolint:dupl // handler HTTP pequeño y simétrico con otros; duplicación es intencional por claridad
 	if !httpx.RequireMethod(w, r, http.MethodPost) {
 		return
@@ -84,6 +86,7 @@ func (s *Server) approveApplication(w http.ResponseWriter, r *http.Request) { //
 	w.WriteHeader(http.StatusAccepted)
 }
 
+//nolint:misspell
 func (s *Server) deprecateApplication(w http.ResponseWriter, r *http.Request) { //nolint:dupl // handler HTTP pequeño y simétrico con otros; duplicación es intencional por claridad
 	if !httpx.RequireMethod(w, r, http.MethodPost) {
 		return
@@ -111,6 +114,7 @@ func (s *Server) deprecateApplication(w http.ResponseWriter, r *http.Request) { 
 	w.WriteHeader(http.StatusAccepted)
 }
 
+//nolint:misspell
 func (s *Server) startApplicationOnboarding(w http.ResponseWriter, r *http.Request) { //nolint:dupl // handler HTTP pequeño y simétrico con otros; duplicación es intencional por claridad
 	if !requireInternalAuth(w, r) {
 		return
@@ -142,6 +146,7 @@ func (s *Server) startApplicationOnboarding(w http.ResponseWriter, r *http.Reque
 	w.WriteHeader(http.StatusAccepted)
 }
 
+//nolint:misspell
 func (s *Server) activateApplication(w http.ResponseWriter, r *http.Request) { //nolint:dupl // handler HTTP pequeño y simétrico con otros; duplicación es intencional por claridad
 	if !requireInternalAuth(w, r) {
 		return

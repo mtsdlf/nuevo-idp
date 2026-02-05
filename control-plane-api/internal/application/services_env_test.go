@@ -45,9 +45,9 @@ func TestDeclareApplicationEnvironment_EnforcesUniqueness(t *testing.T) {
 	appEnvRepo := memoryrepo.NewApplicationEnvironmentRepository()
 
 	services := &Services{
-		Teams:                  teamRepo,
-		Applications:           appRepo,
-		Environments:           envRepo,
+		Teams:                   teamRepo,
+		Applications:            appRepo,
+		Environments:            envRepo,
 		ApplicationEnvironments: appEnvRepo,
 	}
 
@@ -79,9 +79,9 @@ func TestCompleteApplicationEnvironmentProvisioning_TransitionsToActive(t *testi
 	appEnvRepo := memoryrepo.NewApplicationEnvironmentRepository()
 
 	services := &Services{
-		Teams:                  teamRepo,
-		Applications:           appRepo,
-		Environments:           envRepo,
+		Teams:                   teamRepo,
+		Applications:            appRepo,
+		Environments:            envRepo,
 		ApplicationEnvironments: appEnvRepo,
 	}
 

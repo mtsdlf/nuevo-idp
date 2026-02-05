@@ -30,6 +30,7 @@ type completeSecretRotationRequest struct {
 	ID string `json:"id"`
 }
 
+//nolint:misspell
 func (s *Server) createSecret(w http.ResponseWriter, r *http.Request) { //nolint:dupl // handler HTTP pequeño y simétrico con otros; duplicación es intencional por claridad
 	if !httpx.RequireMethod(w, r, http.MethodPost) {
 		return
@@ -57,6 +58,7 @@ func (s *Server) createSecret(w http.ResponseWriter, r *http.Request) { //nolint
 	w.WriteHeader(http.StatusCreated)
 }
 
+//nolint:misspell
 func (s *Server) declareSecretBinding(w http.ResponseWriter, r *http.Request) { //nolint:dupl // handler HTTP pequeño y simétrico con otros; duplicación es intencional por claridad
 	if !httpx.RequireMethod(w, r, http.MethodPost) {
 		return
@@ -84,6 +86,7 @@ func (s *Server) declareSecretBinding(w http.ResponseWriter, r *http.Request) { 
 	w.WriteHeader(http.StatusCreated)
 }
 
+//nolint:misspell
 func (s *Server) startSecretRotation(w http.ResponseWriter, r *http.Request) { //nolint:dupl // handler HTTP pequeño y simétrico con otros; duplicación es intencional por claridad
 	if !httpx.RequireMethod(w, r, http.MethodPost) {
 		return
@@ -111,6 +114,7 @@ func (s *Server) startSecretRotation(w http.ResponseWriter, r *http.Request) { /
 	w.WriteHeader(http.StatusAccepted)
 }
 
+//nolint:misspell
 func (s *Server) completeSecretRotation(w http.ResponseWriter, r *http.Request) { //nolint:dupl // handler HTTP pequeño y simétrico con otros; duplicación es intencional por claridad
 	if !requireInternalAuth(w, r) {
 		return

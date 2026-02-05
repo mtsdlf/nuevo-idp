@@ -6,10 +6,10 @@ import (
 
 	"errors"
 
+	"github.com/nuevo-idp/platform/observability"
 	"github.com/nuevo-idp/workflow-engine/internal/adapters/appenvprovhttp"
 	"github.com/nuevo-idp/workflow-engine/internal/adapters/controlplanehttp"
 	"github.com/nuevo-idp/workflow-engine/internal/adapters/gitproviderhttp"
-	"github.com/nuevo-idp/platform/observability"
 	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/log"
 	"go.temporal.io/sdk/temporal"

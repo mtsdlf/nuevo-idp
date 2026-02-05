@@ -8,7 +8,9 @@ import (
 )
 
 // Fitness function de arquitectura: los workflows no deben depender
-// directamente de implementaciones concretas de puertos HTTP ni de //nolint:misspell // comentario en español, "implementaciones" es correcto
+// directamente de implementaciones concretas de puertos HTTP ni de
+//nolint:misspell
+// implementaciones // comentario en español, "implementaciones" es correcto
 // otros servicios fuera de adapters inyectados desde main.
 
 func TestFitness_Workflows_OnlyUseControlPlanePortInterface(t *testing.T) {

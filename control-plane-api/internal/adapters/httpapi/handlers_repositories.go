@@ -14,8 +14,8 @@ type declareCodeRepositoryRequest struct {
 }
 
 type declareDeploymentRepositoryRequest struct {
-	ID             string `json:"id"`
-	ApplicationID  string `json:"applicationId"`
+	ID              string `json:"id"`
+	ApplicationID   string `json:"applicationId"`
 	DeploymentModel string `json:"deploymentModel"`
 }
 
@@ -25,6 +25,7 @@ type declareGitOpsIntegrationRequest struct {
 	DeploymentRepoID string `json:"deploymentRepositoryId"`
 }
 
+//nolint:misspell
 func (s *Server) declareCodeRepository(w http.ResponseWriter, r *http.Request) { //nolint:dupl // handler HTTP pequeño y simétrico con otros; duplicación es intencional por claridad
 	if !httpx.RequireMethod(w, r, http.MethodPost) {
 		return
@@ -52,6 +53,7 @@ func (s *Server) declareCodeRepository(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
+//nolint:misspell
 func (s *Server) declareDeploymentRepository(w http.ResponseWriter, r *http.Request) { //nolint:dupl // handler HTTP pequeño y simétrico con otros; duplicación es intencional por claridad
 	if !httpx.RequireMethod(w, r, http.MethodPost) {
 		return
@@ -79,6 +81,7 @@ func (s *Server) declareDeploymentRepository(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusCreated)
 }
 
+//nolint:misspell
 func (s *Server) declareGitOpsIntegration(w http.ResponseWriter, r *http.Request) { //nolint:dupl // handler HTTP pequeño y simétrico con otros; duplicación es intencional por claridad
 	if !httpx.RequireMethod(w, r, http.MethodPost) {
 		return
