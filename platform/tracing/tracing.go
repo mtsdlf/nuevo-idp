@@ -2,6 +2,7 @@ package tracing
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"time"
 
@@ -56,7 +57,7 @@ func InitTracing(ctx context.Context, serviceName string) (func(context.Context)
 			),
 		)
 		if err != nil {
-			return func(context.Context) error { return nil }, err
+			return func(context.Context) error { return nil }, fmt.Errorf("create resource: %w", err)
 		}
 		p := sdktrace.NewTracerProvider(
 			sdktrace.WithResource(res),
@@ -68,7 +69,7 @@ func InitTracing(ctx context.Context, serviceName string) (func(context.Context)
 
 	exporter, err := otlptracehttp.New(ctx)
 	if err != nil {
-		return func(context.Context) error { return nil }, err
+		return func(context.Context) error { return nil }, fmt.Errorf("create OTLP exporter: %w", err)
 	}
 
 	res, err := resource.New(ctx,
@@ -77,7 +78,7 @@ func InitTracing(ctx context.Context, serviceName string) (func(context.Context)
 		),
 	)
 	if err != nil {
-		return func(context.Context) error { return nil }, err
+		return func(context.Context) error { return nil }, fmt.Errorf("create resource: %w", err)
 	}
 
 	tp = sdktrace.NewTracerProvider(

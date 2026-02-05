@@ -28,7 +28,11 @@ func NewLogger() (*zap.Logger, error) {
 	}
 	cfg.Level = zap.NewAtomicLevelAt(level)
 
-	return cfg.Build()
+	logger, err := cfg.Build()
+	if err != nil {
+		return nil, fmt.Errorf("build logger: %w", err)
+	}
+	return logger, nil
 }
 
 // LoggerWithTrace enriquece el logger con trace_id/span_id si hay un span en el contexto.

@@ -304,19 +304,19 @@ func (c *Client) MarkApplicationOnboarding(ctx context.Context, applicationID st
 
 	body, err := json.Marshal(startApplicationOnboardingRequest{ID: applicationID})
 	if err != nil {
-		return err
+		return fmt.Errorf("marshal startApplicationOnboardingRequest: %w", err)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+"/commands/applications/start-onboarding", bytes.NewReader(body))
 	if err != nil {
-		return err
+		return fmt.Errorf("create start-onboarding HTTP request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	setInternalAuthHeader(req)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("do start-onboarding HTTP request: %w", err)
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return newErrorFromResponse(resp)
@@ -334,19 +334,19 @@ func (c *Client) ActivateApplication(ctx context.Context, applicationID string) 
 
 	body, err := json.Marshal(activateApplicationRequest{ID: applicationID})
 	if err != nil {
-		return err
+		return fmt.Errorf("marshal activateApplicationRequest: %w", err)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+"/commands/applications/activate", bytes.NewReader(body))
 	if err != nil {
-		return err
+		return fmt.Errorf("create activate HTTP request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	setInternalAuthHeader(req)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("do activate HTTP request: %w", err)
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return newErrorFromResponse(resp)
@@ -364,19 +364,19 @@ func (c *Client) CompleteSecretRotation(ctx context.Context, secretID string) er
 
 	body, err := json.Marshal(completeSecretRotationRequest{ID: secretID})
 	if err != nil {
-		return err
+		return fmt.Errorf("marshal completeSecretRotationRequest: %w", err)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+"/commands/secrets/complete-rotation", bytes.NewReader(body))
 	if err != nil {
-		return err
+		return fmt.Errorf("create complete-rotation HTTP request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	setInternalAuthHeader(req)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("do complete-rotation HTTP request: %w", err)
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return newErrorFromResponse(resp)

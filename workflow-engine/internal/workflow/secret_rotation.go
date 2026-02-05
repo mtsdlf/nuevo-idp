@@ -92,24 +92,28 @@ func SecretRotation(ctx workflow.Context, input SecretRotationInput) (err error)
 	// 1. Rotar el secreto (aún sin efectos en execution-workers).
 	if err := workflow.ExecuteActivity(ctx, PerformSecretRotation, input.SecretID).Get(ctx, nil); err != nil {
 		observability.ObserveDomainEvent("workflow_secret_rotation_failed", "error")
+		//nolint:wrapcheck // propagamos el error tal cual para preservar el tipo de ApplicationError
 		return err
 	}
 
 	// 2. Esperar la validación externa de la rotación.
 	if err := waitForRotationValidatedExternally(ctx); err != nil {
 		observability.ObserveDomainEvent("workflow_secret_rotation_failed", "error")
+		//nolint:wrapcheck // propagamos el error tal cual para preservar el tipo de ApplicationError
 		return err
 	}
 
 	// 3. Actualizar los SecretBindings asociados al Secret en sistemas externos.
 	if err := workflow.ExecuteActivity(ctx, UpdateSecretBindingsForSecret, input.SecretID).Get(ctx, nil); err != nil {
 		observability.ObserveDomainEvent("workflow_secret_rotation_failed", "error")
+		//nolint:wrapcheck // propagamos el error tal cual para preservar el tipo de ApplicationError
 		return err
 	}
 
 	// 4. Completar la rotación en el control-plane.
 	if err := workflow.ExecuteActivity(ctx, CompleteSecretRotationActivity, input.SecretID).Get(ctx, nil); err != nil {
 		observability.ObserveDomainEvent("workflow_secret_rotation_failed", "error")
+		//nolint:wrapcheck // propagamos el error tal cual para preservar el tipo de ApplicationError
 		return err
 	}
 
