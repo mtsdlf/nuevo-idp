@@ -72,6 +72,7 @@ func TestCreateApplicationEndpoint_FailsWhenTeamNotFound(t *testing.T) {
 	}
 }
 
+//nolint:dupl
 func TestCreateApplicationEndpoint_FailsWhenDuplicateID(t *testing.T) {
 	server, _, appRepo, _, _, _, _, _, _, _ := newTestServer()
 	mux := server.Routes()
@@ -272,6 +273,7 @@ func TestDeprecateApplicationEndpoint_FailsWhenNotFound(t *testing.T) {
 	}
 }
 
+//nolint:dupl
 func TestDeprecateApplicationEndpoint_FailsWhenInvalidState(t *testing.T) {
 	server, _, appRepo, _, _, _, _, _, _, _ := newTestServer()
 	mux := server.Routes()
@@ -372,6 +374,7 @@ func TestStartApplicationOnboardingEndpoint_FailsWhenNotFound(t *testing.T) {
 	}
 }
 
+//nolint:dupl
 func TestStartApplicationOnboardingEndpoint_FailsWhenInvalidState(t *testing.T) {
 	server, _, appRepo, _, _, _, _, _, _, _ := newTestServer()
 	mux := server.Routes()
@@ -475,6 +478,7 @@ func TestActivateApplicationEndpoint_FailsWhenNotFound(t *testing.T) {
 	}
 }
 
+//nolint:dupl
 func TestActivateApplicationEndpoint_FailsWhenInvalidState(t *testing.T) {
 	server, _, appRepo, _, _, _, _, _, _, _ := newTestServer()
 	mux := server.Routes()

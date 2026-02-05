@@ -292,6 +292,7 @@ func TestDeclareGitOpsIntegrationEndpoint_FailsWhenApplicationNotFound(t *testin
 	}
 }
 
+//nolint:dupl
 func TestDeclareGitOpsIntegrationEndpoint_FailsWhenDeploymentRepositoryNotFound(t *testing.T) {
 	server, _, appRepo, _, _, _, _, _, _, _ := newTestServer()
 	mux := server.Routes()

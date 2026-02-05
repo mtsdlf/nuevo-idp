@@ -75,7 +75,7 @@ func SecretRotation(ctx workflow.Context, input SecretRotationInput) (err error)
 	}()
 
 	if input.SecretID == "" {
-		return temporal.NewNonRetryableApplicationError("SecretID is required", "bad_input", nil)
+		return temporal.NewNonRetryableApplicationError("SecretID is required", "bad_input", nil) //nolint:wrapcheck
 	}
 
 	opts := workflow.ActivityOptions{
@@ -99,7 +99,6 @@ func SecretRotation(ctx workflow.Context, input SecretRotationInput) (err error)
 	// 2. Esperar la validación externa de la rotación.
 	if err := waitForRotationValidatedExternally(ctx); err != nil {
 		observability.ObserveDomainEvent("workflow_secret_rotation_failed", "error")
-		//nolint:wrapcheck // propagamos el error tal cual para preservar el tipo de ApplicationError
 		return err
 	}
 
@@ -146,7 +145,7 @@ func waitForRotationValidatedExternally(ctx workflow.Context) error {
 	}
 
 	logger.Info("Secret rotation validation timeout reached")
-	return temporal.NewNonRetryableApplicationError("secret rotation timeout", "secret_rotation_timeout", nil)
+	return temporal.NewNonRetryableApplicationError("secret rotation timeout", "secret_rotation_timeout", nil) //nolint:wrapcheck
 }
 
 // PerformSecretRotation es una actividad placeholder; la rotación real del

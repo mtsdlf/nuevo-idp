@@ -31,7 +31,7 @@ func (r *TeamRepository) GetByID(ctx context.Context, id string) (*domain.Team, 
 
 	row := r.pool.QueryRow(ctx, query, id)
 	if err := row.Scan(&team.ID, &team.Name, &team.State, &createdBy, &createdAt); err != nil {
-		if errors.Is(err, pgx.ErrNoRows) { //nolint:typecheck // golangci-lint en contenedor no resuelve pgx correctamente, pero el build real sí
+				if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("scanning team: %w", err)

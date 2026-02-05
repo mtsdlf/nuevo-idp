@@ -249,7 +249,7 @@ func TestActivateApplication_FailsFromNonOnboarding(t *testing.T) {
 	}
 }
 
-func TestStartSecretRotation_TransitionsActiveToRotating(t *testing.T) { //nolint:dupl,misspell // setup deliberadamente similar a CompleteSecretRotation para cubrir ambas transiciones de estado
+func TestStartSecretRotation_TransitionsActiveToRotating(t *testing.T) { //nolint:dupl // setup deliberadamente similar a CompleteSecretRotation para cubrir ambas transiciones de estado
 	teamRepo := memoryrepo.NewTeamRepository()
 	secretRepo := memoryrepo.NewSecretRepository()
 

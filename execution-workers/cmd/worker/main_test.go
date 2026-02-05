@@ -86,6 +86,7 @@ func TestHandleAppEnvHandlers_MethodNotAllowed(t *testing.T) {
 	}
 }
 
+//nolint:dupl
 func TestHandleAppEnvHandlers_InvalidJSON(t *testing.T) {
 	handlers := []http.HandlerFunc{
 		func(w http.ResponseWriter, r *http.Request) { handleAppEnvBranchProtection(zap.NewNop(), w, r) },
@@ -107,6 +108,7 @@ func TestHandleAppEnvHandlers_InvalidJSON(t *testing.T) {
 	}
 }
 
+//nolint:dupl
 func TestHandleAppEnvHandlers_MissingID(t *testing.T) {
 	handlers := []http.HandlerFunc{
 		func(w http.ResponseWriter, r *http.Request) { handleAppEnvBranchProtection(zap.NewNop(), w, r) },
@@ -128,6 +130,7 @@ func TestHandleAppEnvHandlers_MissingID(t *testing.T) {
 	}
 }
 
+//nolint:dupl
 func TestHandleAppEnvHandlers_AcceptsValidRequest(t *testing.T) {
 	called := false
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

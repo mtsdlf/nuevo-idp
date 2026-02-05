@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"fmt"
 	"errors"
 
 	"github.com/nuevo-idp/platform/observability"
@@ -212,7 +213,7 @@ func FinalizeApplicationEnvironmentProvisioning(ctx context.Context, appEnvID st
 	}
 
 	logger.Info("Calling control-plane-api to finalize ApplicationEnvironment provisioning", "appEnvID", appEnvID)
-	err := controlPlaneClient.CompleteApplicationEnvironmentProvisioning(ctx, appEnvID)
+	err := controlPlaneClient.CompleteApplicationEnvironmentProvisioning(ctx, appEnvID) 
 	if err == nil {
 		return nil
 	}
@@ -239,11 +240,11 @@ func FinalizeApplicationEnvironmentProvisioning(ctx context.Context, appEnvID st
 			msg = err.Error()
 		}
 		observability.ObserveDownstreamError("control-plane-api", code, apiErr.Status)
-		//nolint:wrapcheck // devolvemos directamente ApplicationError de Temporal para que el workflow pueda inspeccionar Type
+		//nolint:wrapcheck // devolvemos directamente ApplicationError de Temporal para que el caller pueda inspeccionar Type
 		return temporal.NewNonRetryableApplicationError(msg, code, err)
 	}
 
-	return err
+	return fmt.Errorf("finalize application environment provisioning: %w", err)
 }
 
 // mapExecutionWorkersError convierte errores provenientes de los adapters HTTP

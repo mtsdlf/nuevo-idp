@@ -77,7 +77,7 @@ func ApplicationOnboarding(ctx workflow.Context, input ApplicationOnboardingInpu
 	}()
 
 	if input.ApplicationID == "" {
-		return temporal.NewNonRetryableApplicationError("ApplicationID is required", "bad_input", nil)
+		return temporal.NewNonRetryableApplicationError("ApplicationID is required", "bad_input", nil) //nolint:wrapcheck
 	}
 
 	opts := workflow.ActivityOptions{
@@ -94,44 +94,38 @@ func ApplicationOnboarding(ctx workflow.Context, input ApplicationOnboardingInpu
 	// 1. Crear CodeRepository para la aplicación.
 	if err := workflow.ExecuteActivity(ctx, CreateCodeRepositoryForApplication, input.ApplicationID).Get(ctx, nil); err != nil {
 		observability.ObserveDomainEvent("workflow_application_onboarding_failed", "error")
-		//nolint:wrapcheck // propagamos el error tal cual para preservar el tipo de ApplicationError
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	// 2. Crear DeploymentRepository si aplica. El adapter decidirá si realmente
 	// crea algo o si es un no-op según el modelo de despliegue.
 	if err := workflow.ExecuteActivity(ctx, CreateDeploymentRepositoryForApplication, input.ApplicationID).Get(ctx, nil); err != nil {
 		observability.ObserveDomainEvent("workflow_application_onboarding_failed", "error")
-		//nolint:wrapcheck // propagamos el error tal cual para preservar el tipo de ApplicationError
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	// 3. Crear GitOpsIntegration para la aplicación.
 	if err := workflow.ExecuteActivity(ctx, CreateGitOpsIntegrationForApplication, input.ApplicationID).Get(ctx, nil); err != nil {
 		observability.ObserveDomainEvent("workflow_application_onboarding_failed", "error")
-		//nolint:wrapcheck // propagamos el error tal cual para preservar el tipo de ApplicationError
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	// 4. Declarar los ApplicationEnvironments necesarios para la aplicación.
 	if err := workflow.ExecuteActivity(ctx, DeclareApplicationEnvironmentsForApplication, input.ApplicationID).Get(ctx, nil); err != nil {
 		observability.ObserveDomainEvent("workflow_application_onboarding_failed", "error")
-		//nolint:wrapcheck // propagamos el error tal cual para preservar el tipo de ApplicationError
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	// 5. Esperar evento externo SecurityScanPassed con timeout.
 	if err := waitForSecurityScanPassed(ctx); err != nil {
 		observability.ObserveDomainEvent("workflow_application_onboarding_failed", "error")
-		//nolint:wrapcheck // propagamos el error tal cual para preservar el tipo de ApplicationError
 		return err
 	}
 
 	// 6. Transicionar la Application a estado Onboarding.
 	if err := workflow.ExecuteActivity(ctx, TransitionApplicationToOnboarding, input.ApplicationID).Get(ctx, nil); err != nil {
 		observability.ObserveDomainEvent("workflow_application_onboarding_failed", "error")
-		//nolint:wrapcheck // propagamos el error tal cual para preservar el tipo de ApplicationError
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	observability.ObserveDomainEvent("workflow_application_onboarding_completed", "success")
@@ -163,7 +157,7 @@ func waitForSecurityScanPassed(ctx workflow.Context) error {
 	}
 
 	logger.Info("Security scan timeout reached")
-	return temporal.NewNonRetryableApplicationError("security scan timeout", "security_scan_timeout", nil)
+	return temporal.NewNonRetryableApplicationError("security scan timeout", "security_scan_timeout", nil) //nolint:wrapcheck
 }
 
 // Las actividades siguientes delegan en el puerto ApplicationOnboardingPort.
@@ -259,7 +253,7 @@ func ApplicationActivation(ctx workflow.Context, input ApplicationActivationInpu
 	}()
 
 	if input.ApplicationID == "" {
-		return temporal.NewNonRetryableApplicationError("ApplicationID is required", "bad_input", nil)
+		return temporal.NewNonRetryableApplicationError("ApplicationID is required", "bad_input", nil) //nolint:wrapcheck
 	}
 
 	opts := workflow.ActivityOptions{
@@ -274,7 +268,7 @@ func ApplicationActivation(ctx workflow.Context, input ApplicationActivationInpu
 	ctx = workflow.WithActivityOptions(ctx, opts)
 
 	if err := workflow.ExecuteActivity(ctx, TransitionApplicationToActive, input.ApplicationID).Get(ctx, nil); err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	return nil
@@ -345,7 +339,7 @@ func mapControlPlaneError(err error) error {
 		}
 
 		observability.ObserveDownstreamError("control-plane-api", code, apiErr.Status)
-		return temporal.NewNonRetryableApplicationError(msg, code, err)
+		return temporal.NewNonRetryableApplicationError(msg, code, err) //nolint:wrapcheck
 	}
 
 	return err
