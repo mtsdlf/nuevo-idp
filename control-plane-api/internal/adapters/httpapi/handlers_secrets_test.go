@@ -145,7 +145,7 @@ func TestStartSecretRotationEndpoint_TransitionsToRotating(t *testing.T) { //nol
 	}
 }
 
-func TestStartSecretRotationEndpoint_FailsIfNotActive(t *testing.T) { //nolint:dupl // patrón de test repetido a propósito para cubrir transición feliz y estados inválidos
+func TestStartSecretRotationEndpoint_FailsIfNotActive(t *testing.T) {
 	server, _, _, _, _, secretRepo, _, _, _, _ := newTestServer()
 	mux := server.Routes()
 	ctx := httptest.NewRequest("", "/", nil).Context()
@@ -228,7 +228,7 @@ func TestCompleteSecretRotationEndpoint_TransitionsToActive(t *testing.T) { //no
 	}
 }
 
-func TestCompleteSecretRotationEndpoint_FailsIfNotRotating(t *testing.T) { //nolint:dupl // patrón de test repetido a propósito para cubrir transición feliz y estados inválidos
+func TestCompleteSecretRotationEndpoint_FailsIfNotRotating(t *testing.T) {
 	server, _, _, _, _, secretRepo, _, _, _, _ := newTestServer()
 	mux := server.Routes()
 	ctx := httptest.NewRequest("", "/", nil).Context()
