@@ -453,11 +453,12 @@ func handleSecretBindingsUpdate(baseLogger *zap.Logger, w http.ResponseWriter, r
 	// sistema externo la propagación del token a todos los SecretBindings
 	// asociados al Secret.
 	bindingsEndpoint := config.Get("SECRET_BINDINGS_UPDATE_ENDPOINT", "")
-	if bindingsEndpoint == "" {
+	switch {
+	case bindingsEndpoint == "":
 		logger.Info("SECRET_BINDINGS_UPDATE_ENDPOINT not configured; skipping bindings propagation")
-	} else if token == "" {
+	case token == "":
 		logger.Warn("no rotated token available; skipping bindings propagation")
-	} else {
+	default:
 		propCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 		defer cancel()
 
@@ -465,22 +466,20 @@ func handleSecretBindingsUpdate(baseLogger *zap.Logger, w http.ResponseWriter, r
 		outReq, err := http.NewRequestWithContext(propCtx, http.MethodPost, bindingsEndpoint, body)
 		if err != nil {
 			logger.Error("error creating secret bindings propagation request", zap.Error(err))
-		} else {
-			outReq.Header.Set("Content-Type", "application/json")
+			break
+		}
+		outReq.Header.Set("Content-Type", "application/json")
 
-			resp, err := http.DefaultClient.Do(outReq)
-			if err != nil {
-				logger.Error("error calling secret bindings propagation endpoint", zap.Error(err))
-			} else {
-				defer func() {
-					_ = resp.Body.Close()
-				}()
-				if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-					logger.Error("secret bindings propagation endpoint returned non-2xx", zap.Int("status", resp.StatusCode))
-				} else {
-					logger.Info("secret bindings propagation completed successfully", zap.Int("status", resp.StatusCode))
-				}
-			}
+		resp, err := http.DefaultClient.Do(outReq)
+		if err != nil {
+			logger.Error("error calling secret bindings propagation endpoint", zap.Error(err))
+			break
+		}
+		defer func() { _ = resp.Body.Close() }()
+		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+			logger.Error("secret bindings propagation endpoint returned non-2xx", zap.Int("status", resp.StatusCode))
+		} else {
+			logger.Info("secret bindings propagation completed successfully", zap.Int("status", resp.StatusCode))
 		}
 	}
 
